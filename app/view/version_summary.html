@@ -1,0 +1,20 @@
+<h5>Version Summary</h5>
+<li>Version ID: {{ @version['version_id'] }}</li>
+<li>Project ID: {{ @version['project_id'] }}</li>
+<li>Version: {{ @version['version'] }}</li>
+<li>Datetime: {{ @version['datetime'] }}</li>
+<li>Thumbnail: {{ @version['thumb'] }}</li>
+<li>Files:
+
+    <F3:repeat group="{{@files}}" key="{{@file}}" value="{{@val}}">
+        <ul>
+        <li>File ID: {{ @val['file_id'] }}</li>
+        <li>Version ID: {{ @val['version_id'] }}</li>
+        <li>Quality: {{ @val['quality'] }}</li>
+        <li>Complete: {{ @val['complete'] }}</li>
+        <li>Is master: {{ @val['is_master'] }}</li>
+        <li>Path: {{ @val['path'] }}</li>
+        </ul>
+    </F3:repeat>
+
+</li>
