@@ -1,4 +1,11 @@
-<h5>Version Summary</h5>
+<p>
+    <a href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/pv/{{ @version['version'] }}">
+        <b>Version {{ @version['version'] }}:</b> {{ @version['datetime'] }}
+    </a>
+</p>
+
+
+<exclude><h5>Version Summary</h5>
 <li>Version ID: {{ @version['version_id'] }}</li>
 <li>Project ID: {{ @version['project_id'] }}</li>
 <li>Version: {{ @version['version'] }}</li>
@@ -17,4 +24,4 @@
         </ul>
     </F3:repeat>
 
-</li>
+</li></exclude>

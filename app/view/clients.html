@@ -1,5 +1,14 @@
 <include href="header.html" />
-<h2>Projects for {{ @client[client_full] }}:</h2>
+<!-- *****************************************************************************************************************
+ BLUE WRAP
+ ***************************************************************************************************************** -->
+<div id="blue">
+    <div class="container">
+        <div class="row">
+            <h3>{{ @client[client_full] }} <span style="font-weight:lighter">| All Projects</span></h3>
+        </div><!-- /row -->
+    </div> <!-- /container -->
+</div><!-- /blue -->
 
 {{ @client_projects | raw }}
 
