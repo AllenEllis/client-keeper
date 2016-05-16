@@ -160,28 +160,7 @@ class Version {
     var $thumb;
 
     function get($version_id=NULL) {
-        /* $f3 = \Base::instance();
-         if($version_id){
 
-             $versions=new DB\SQL\Mapper($f3->get('DB'),'versions');
-             $versions->load(array('version_id=?',$version_id));
-
-             $out = array(
-                 "version_id"=>$versions->version_id,
-                 "project_id"=>$versions->project_id,
-                 "version"=>$versions->version,
-                 "timestamp"=>$versions->timestamp,
-             );
-
-             print_r($out);
-             echo "I just ran";
-
-             return $out;
-         }
-         else
-         {
-             $version = $f3->get('PARAMS.version');
-         }*/
     }
 
     function get_all($project_id) {
@@ -201,6 +180,7 @@ class Version {
                 "project_id"=>$version->project_id,
                 "version_name"=>$version->version_name,
                 "version_master_filename"=>$version->version_master_filename,
+                "version_master_full_path"=>$version->version_master_full_path,
                 "timestamp"=>$version->timestamp,
                 "datetime"=>date("F j, Y, g:i a",$version->timestamp), // todo, add timestamp calculation here
                 "thumb"=>$version->thumb,
@@ -241,6 +221,62 @@ class Version {
         return $out;
     }
 
+    function transcode($version) {
+        $f3 = \Base::instance();
+        $out = array();
+        $file_obj = new File;
+        //$file = $file_obj->get_all($version['version_id']);
+
+        $out[] = array("Preparing to transcode version #". $version['version_id'],$version);
+
+        $src_path = $version['version_master_full_path'];
+        $src_filename = $version['version_master_filename'];
+        $dst_folder = substr($src_path,0,-strlen($src_filename)) . $f3->get('transcodes_subfolder').'/';
+
+        $out[]= "New dst_folder will be $dst_folder";
+
+        $encoder_options = $f3->get('encoder_options');
+        $thumbnail_percentages = $f3->get('thumbnail_percentages');
+        $encoder_url = $f3->get('encoder_url') . "/jobs";
+
+        $out[] = array("Encoder options will be",$encoder_options);
+        $out[] = array("Thumbnail percentages will be",$thumbnail_percentages);
+
+
+        foreach ($encoder_options as $key=>$encoder_option) {
+            // todo security on codem-transcode with tokens to prevent abuse
+
+            //$out[] = array("I'm in the foreach loop and I see encoder_option as a ",$encoder_option);
+            $dst_path = $dst_folder . substr($src_filename,0,-4) . " [" . $key . "]." . $f3->get('encoder_extension');
+
+            $data = array(
+            "source_file" => $src_path,
+            "destination_file" => $dst_path,
+            "encoder_options" => $encoder_option,
+            "thumbnail_options" => array(
+                "percentages" => $thumbnail_percentages,
+                "size" => "1280x720", // todo be smart and maintain original aspect ratio
+                "format" => "jpg"
+            ),
+            "segments_options" => array(
+                "segment_time" => 10
+            ),
+            "callback_urls" => ""
+            );
+
+
+            $out[] = array("About to request the following via POST to $encoder_url",$data);
+
+            $result = json_post($encoder_url,$data);
+            $out[] = array("Result from encoder:",$result);
+        }
+
+
+
+
+
+        return $out;
+    }
 
 }
 

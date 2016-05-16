@@ -200,7 +200,19 @@ class update {
     }
 
     function transcode($f3,$args) {
-        echo "I would be transcoding here";
+        echo "\r\nTranscoding project folders\r\n<pre>";
+
+
+        $out = array();
+
+        // todo loop through all clients, all projects
+        $version_obj = new Version;
+        $version = $version_obj->get_all(108);
+
+        $out[] = $version_obj->transcode($version[0]);
+
+        print_r($out);
+
     }
 
 
