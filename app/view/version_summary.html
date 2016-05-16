@@ -1,14 +1,13 @@
 <p>
-    <a href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/pv/{{ @version['version'] }}">
-        <b>Version {{ @version['version'] }}:</b> {{ @version['datetime'] }}
+    <a href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/pv/{{ @version['version_name'] }}">
+        <b>Version {{ @version['version_name'] }}:</b> {{ @version['datetime'] }}
     </a>
 </p>
-
 
 <exclude><h5>Version Summary</h5>
 <li>Version ID: {{ @version['version_id'] }}</li>
 <li>Project ID: {{ @version['project_id'] }}</li>
-<li>Version: {{ @version['version'] }}</li>
+<li>Version: {{ @version['version_name'] }}</li>
 <li>Datetime: {{ @version['datetime'] }}</li>
 <li>Thumbnail: {{ @version['thumb'] }}</li>
 <li>Files:

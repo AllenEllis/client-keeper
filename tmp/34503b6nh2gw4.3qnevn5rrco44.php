@@ -27,6 +27,8 @@
                 </ol>
 
                
+
+            </div><! --/Carousel -->
             <?php echo $video_embed; ?>
         </div>
 

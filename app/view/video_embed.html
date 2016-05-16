@@ -1,18 +1,26 @@
+START
+<div class="flowplayer">
+    <video>
+        <F3:repeat group="{{@files}}" key="{{@file}}" value="{{@val}}">
+            <check if="{{ @val['complete']==1 }}">
+                <!-- <source type="video/mp4"
+                        src="{{ @val['full_path'] }}"> -->
+
+            </check>
+        </F3:repeat>
+        <source type="application/dash+xml"
+                src="http://allenell.is/clients/media/dash/stream.mpd"
+                debug="true">
+        <source type="video/mp4"
+                src="http://allenell.is/clients/media/test1-360f.mp4">
+    </video>
+</div>
+END
 
 
-
-
-<F3:repeat group="{{@files}}" key="{{@file}}" value="{{@val}}">
-    <check if="{{ @val['complete']==1 }}">
-        <p><a class="btn btn-success" href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/dl/{{ @val['version_id'] }}/{{ @val['quality'] }}">
-            <span class="glyphicon glyphicon-download"></span>
-            {{ @val['quality'] }} <span class="small">&mdash; {{ @val['filesize_h'] }}</span>
-        </a>
-        </p>
-    </check>
-</F3:repeat>
 
 <exclude>
+
 <li>File ID: {{ @val['file_id'] }}</li>
 <li>Version ID: {{ @val['version_id'] }}</li>
 <li>Quality: {{ @val['quality'] }}</li>

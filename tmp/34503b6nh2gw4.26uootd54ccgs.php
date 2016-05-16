@@ -25,6 +25,25 @@
     <![endif]-->
 
     <script src="<?php echo $site['url']; ?>ui/js/modernizr.js"></script>
+
+    <link rel="stylesheet" href="<?php echo $site['url']; ?>ui/flowplayer/skin/minimalist.css">
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="<?php echo $site['url']; ?>ui/flowplayer/flowplayer.min.js"></script>
+    <!-- global options -->
+    <script>
+        flowplayer.conf = {
+            ratio: 5/12,
+            splash: true,
+            analytics: "UA-27182341-1"
+            dash: {
+                debug: true
+            }
+        };
+    </script>
+
+    <!-- load the latest version of the dashjs plugin -->
+    <script src="//releases.flowplayer.org/dashjs/flowplayer.dashjs.min.js"></script>
+
 </head>
 
 <body>  <!-- Fixed navbar -->

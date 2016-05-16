@@ -24,12 +24,17 @@ $f3->set('DB', new DB\SQL(
      $f3->get("db.pass")
 ));
 
+require('app/controller/sources.php');
 require('app/controller/cms.php');
+require('app/controller/update.php');
 
 /* routing functions */
 
 $f3->route('GET /','cms->home');
 $f3->route('GET /about','cms->about');
+
+$f3->route('GET /update/crawl','update->crawl');
+$f3->route('GET /update/transcode','update->transcode');
 
 $f3->route('GET /@client','cms->client');
 $f3->route('GET /@client/@project', 'cms->project');

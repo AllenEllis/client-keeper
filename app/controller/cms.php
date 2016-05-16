@@ -30,6 +30,25 @@ class Client {
         return $out;
     }
 
+    function get_all() {
+        $f3 = \Base::instance();
+        $clients_obj=new DB\SQL\Mapper($f3->get('DB'),'clients');
+        $clients = $clients_obj->find("",array('order'=>'client_full'));
+        $out = array(); // todo clean this up so it calls get() instead
+        foreach($clients as $client)
+        {
+            //if($client->active == 0) continue;
+            $out[] = array(
+                "client_id"=>$client->client_id,
+                "client_short"=>$client->client_short,
+                "client_full"=> $client->client_full,
+                "client_url"=>$f3->get('site.url').$client->client_short,
+                "active"=>$client->active,
+            );
+        }
+        return $out;
+    }
+
 }
 
 function format_bytes($bytes, $precision = 2) {
@@ -40,7 +59,7 @@ function format_bytes($bytes, $precision = 2) {
     $pow = min($pow, count($units) - 1);
 
     // Uncomment one of the following alternatives
-     $bytes /= pow(1024, $pow);
+    $bytes /= pow(1024, $pow);
     // $bytes /= (1 << (10 * $pow));
 
     return round($bytes, $precision) . ' ' . $units[$pow];
@@ -79,17 +98,19 @@ class Project {
         $project_short = $f3->get('PARAMS.project');
         $client_short = $f3->get('PARAMS.client');
         $projects_db=new DB\SQL\Mapper($f3->get('DB'),'projects');
-        $projects=$projects_db->find(array('client_id=?',$client_id));
+        $projects=$projects_db->find(array('client_id=?',$client_id),array('order'=>'project_full'));
 
         $out = array();
         foreach($projects as $project)
         {
+            //if($project->active == 0) continue;
             $out[] = array(
                 "project_id"=>$project->project_id,
                 "client_id"=>$project->client_id,
                 "project_short"=>$project->project_short,
                 "project_full"=>$project->project_full,
                 "description"=> $projects->description,
+                "active"=>$projects->active,
                 "project_url"=> $f3->get('site.url').$client_short."/".$project->project_short
             );
         }
@@ -108,19 +129,26 @@ class Project {
         return \Template::instance()->render('client_projects.html');
     }
 
-
-/*
-    function get_id($project_short=NULL,$id=NULL) {
-        return "id here"; // todo
+    function is_active($project) {
+        if($project['active'] == 1) return true;
+        else return false;
     }
 
-    function get_full($project_short=NULL,$id=NULL) {
-        return "id here"; // todo
+    function is_populated($project) {
     }
 
-    function get_client_id($project_short=NULL,$id=NULL) {
-        return "id here"; // todo
-    }*/
+    /*
+        function get_id($project_short=NULL,$id=NULL) {
+            return "id here"; // todo
+        }
+
+        function get_full($project_short=NULL,$id=NULL) {
+            return "id here"; // todo
+        }
+
+        function get_client_id($project_short=NULL,$id=NULL) {
+            return "id here"; // todo
+        }*/
 }
 
 class Version {
@@ -132,28 +160,28 @@ class Version {
     var $thumb;
 
     function get($version_id=NULL) {
-       /* $f3 = \Base::instance();
-        if($version_id){
+        /* $f3 = \Base::instance();
+         if($version_id){
 
-            $versions=new DB\SQL\Mapper($f3->get('DB'),'versions');
-            $versions->load(array('version_id=?',$version_id));
+             $versions=new DB\SQL\Mapper($f3->get('DB'),'versions');
+             $versions->load(array('version_id=?',$version_id));
 
-            $out = array(
-                "version_id"=>$versions->version_id,
-                "project_id"=>$versions->project_id,
-                "version"=>$versions->version,
-                "timestamp"=>$versions->timestamp,
-            );
+             $out = array(
+                 "version_id"=>$versions->version_id,
+                 "project_id"=>$versions->project_id,
+                 "version"=>$versions->version,
+                 "timestamp"=>$versions->timestamp,
+             );
 
-            print_r($out);
-            echo "I just ran";
+             print_r($out);
+             echo "I just ran";
 
-            return $out;
-        }
-        else
-        {
-            $version = $f3->get('PARAMS.version');
-        }*/
+             return $out;
+         }
+         else
+         {
+             $version = $f3->get('PARAMS.version');
+         }*/
     }
 
     function get_all($project_id) {
@@ -162,7 +190,7 @@ class Version {
 
         $versions_db=new DB\SQL\Mapper($f3->get('DB'),'versions');
         $versions=$versions_db->find(array('project_id=?',$project_id),array(
-            'order' => 'version DESC'
+            'order' => 'timestamp DESC'
         ));
 
         $out = array();
@@ -171,9 +199,10 @@ class Version {
             $out[] = array(
                 "version_id"=>$version->version_id,
                 "project_id"=>$version->project_id,
-                "version"=>$version->version,
+                "version_name"=>$version->version_name,
+                "version_master_filename"=>$version->version_master_filename,
                 "timestamp"=>$version->timestamp,
-                "datetime"=>$version->timestamp, // todo, add timestamp calculation here
+                "datetime"=>date("F j, Y, g:i a",$version->timestamp), // todo, add timestamp calculation here
                 "thumb"=>$version->thumb,
                 "full_thumb"=>$f3->get('site.url')."media/".$version->thumb
             );
@@ -208,6 +237,8 @@ class Version {
         echo "<!-- \r\n\$files[] \r\n";
         print_r($files);
         echo "-->";
+
+        return $out;
     }
 
 
@@ -223,6 +254,7 @@ class File {
 
     function get($file_id) {
         // todo error checking for bad file_id
+
         $f3 = \Base::instance();
 
         $files_db=new DB\SQL\Mapper($f3->get('DB'),'files');
@@ -235,6 +267,7 @@ class File {
             "complete"=>$file->complete,
             "is_master"=>$file->is_master,
             "path"=>$file->path,
+            "full_path"=>$f3->get('media_root').'/'.$file->path, // todo check full_path still exists, is sanitized
             "filesize"=>$file->filesize,
             "filesize_h"=>format_bytes($file->filesize,0)
         );
@@ -254,13 +287,14 @@ class File {
         $out = array();
         foreach($files as $file)
         {
-            $out[] = array(
+            $out[] = array( // todo should this just call get() instead?
                 "file_id"=>$file->file_id,
                 "version_id"=>$version_id,
                 "quality"=>$file->quality,
                 "complete"=>$file->complete,
                 "is_master"=>$file->is_master,
                 "path"=>$file->path,
+                "full_path"=>$f3->get('media_root').'/'.$file->path, // todo check full_path still exists, is sanitized
                 "filesize"=>$file->filesize,
                 "filesize_h"=>format_bytes($file->filesize,0)
             );
@@ -309,9 +343,19 @@ class File {
 
 class cms {
 
-    function home() {
+    function home($f3) {
         $view=new View;
-        echo $view->render('home.html');
+
+        $client_obj = new Client;
+        $clients = $client_obj->get_all();
+        $f3->set('clients',$clients);
+        $out = "";
+        foreach($clients as $client)
+        {
+            $out .= "<p><a href=\"".$client['client_url']."\">".$client['client_full']."</a></p>";
+        }
+        $f3->set('out',$out);
+        echo \Template::instance()->render('home.html');
     }
 
     function about() {
@@ -329,6 +373,8 @@ class cms {
         $projects = $project_obj->get_all($client['client_id']);
         $client_projects = "";
         foreach ($projects as $project) {
+            if($project_obj->is_active($project)) continue; // todo active detection not yet working
+
             $client_projects .= $project_obj->render_project_summary($project);
         }
 
@@ -355,7 +401,7 @@ class cms {
         $projects = $project_obj->get_all($client['client_id']);
 
         // find all versions
-        
+
         $version_obj = new Version;
         $versions = $version_obj->get_all($project['project_id']);
 
@@ -397,13 +443,13 @@ class cms {
     }
 
     function dl($f3,$args) {
-       /* echo "<b>";
-        if($args['dl'] == 'dl') echo "Downloading"; else echo "Previewing";
-        echo "</b> client: <b>".$args['client']."</b>, project: <b>".$args['project']."</b>";
-        if($args['version']) echo ", version <b>".$args['version']."</b>";
-        else echo ", latest version";
-        if($args['quality']) echo ", quality <b>".$args['quality']."</b>";
-        else echo ", automatic quality";*/
+        /* echo "<b>";
+         if($args['dl'] == 'dl') echo "Downloading"; else echo "Previewing";
+         echo "</b> client: <b>".$args['client']."</b>, project: <b>".$args['project']."</b>";
+         if($args['version']) echo ", version <b>".$args['version']."</b>";
+         else echo ", latest version";
+         if($args['quality']) echo ", quality <b>".$args['quality']."</b>";
+         else echo ", automatic quality";*/
 
         $file_obj = new File();
         $file_id = $file_obj->find($args['client'],$args['project'],$args['version'],$args['quality']);
@@ -411,7 +457,7 @@ class cms {
         $file = $file_obj->get($file_id);
 
         $file_obj->download($file);
-    
+
 
     }
 
