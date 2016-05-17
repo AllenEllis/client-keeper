@@ -35,6 +35,7 @@ $f3->route('GET /about','cms->about');
 
 $f3->route('GET /update/crawl','update->crawl');
 $f3->route('GET /update/transcode','update->transcode');
+$f3->route('GET /update/populate','update->populate');
 
 $f3->route('GET /@client','cms->client');
 $f3->route('GET /@client/@project', 'cms->project');

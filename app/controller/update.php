@@ -215,5 +215,49 @@ class update {
 
     }
 
+    function populate($f3,$args) {
+        echo "\r\nPopulating finished file columns with processed videos\r\n<pre>";
+
+        $out = array();
+
+        $files_db=new DB\SQL\Mapper($f3->get('DB'),'files');
+        $files=$files_db->find(array(),array('order' => 'path ASC'));
+
+        foreach($files as $file) {
+
+            $out[] = array("Analyzing file_id: ".$file->file_id.", path: ".$file->path);
+            if($file->complete == 1) {
+                if(@file_exists($file->path)) {
+                    continue;
+                } else {
+                    $file->complete=0;
+                    $file->save();
+                    $out[] = "Disabled file that has gone missing: ". $file->path;
+
+                }
+            } else {
+                if(@file_exists($file->path)) {
+                    // file has mysteriously come back from the dead. Is it the same size it used to be?
+                    $filesize = filesize($file->path);
+                    if($filesize == $file->filesize) {
+                        $file->complete=1;
+                        $file->filesize=$filesize;
+                        $file->save();
+                        $out[] = "New file marked as complete: " . $file->path;
+                    } else {
+                        $out[] ="File has mysteriously come back as a different size, skipping..."
+                        continue;
+                    }
+
+
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        print_r($out);
+    }
+
 
 }

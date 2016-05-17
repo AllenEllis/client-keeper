@@ -240,14 +240,14 @@ class Version {
         $encoder_url = $f3->get('encoder_url') . "/jobs";
 
         $out[] = array("Encoder options will be",$encoder_options);
-        $out[] = array("Thumbnail percentages will be",$thumbnail_percentages);
+        #$out[] = array("Thumbnail percentages will be",$thumbnail_percentages);
 
 
-        foreach ($encoder_options as $key=>$encoder_option) {
+        foreach ($encoder_options as $quality=>$encoder_option) {
             // todo security on codem-transcode with tokens to prevent abuse
 
             //$out[] = array("I'm in the foreach loop and I see encoder_option as a ",$encoder_option);
-            $dst_path = $dst_folder . substr($src_filename,0,-4) . " [" . $key . "]." . $f3->get('encoder_extension');
+            $dst_path = $dst_folder . substr($src_filename,0,-4) . " [" . $quality . "]." . $f3->get('encoder_extension');
 
             $data = array(
             "source_file" => $src_path,
@@ -259,16 +259,42 @@ class Version {
                 "format" => "jpg"
             ),
             "segments_options" => array(
-                "segment_time" => 10
+                "segment_time" => 3
             ),
             "callback_urls" => ""
             );
+
+
+            if($file_obj->is_in_db($dst_path)) {
+                $out[]=array("Notice: destination file is already listed in our DB, skipping",$dst_path);
+                continue;
+            }
+
+            if(file_exists($dst_path)) {
+                $out[]=array("Notice: destination file already exists [but wasn't in the database yet], skipping",$dst_path);
+                continue;
+            }
+
 
 
             $out[] = array("About to request the following via POST to $encoder_url",$data);
 
             $result = json_post($encoder_url,$data);
             $out[] = array("Result from encoder:",$result);
+
+            // if encoder has begun...
+
+            $file = array(
+                'version_id'=>$version['version_id'],
+                'quality'=>$quality,
+                'complete'=>0,
+                'is_master'=>0,
+                'path'=>$dst_path,
+                'source_path'=>$src_path,
+                'filesize'=>'-1'
+            );
+
+            $out[] = $file_obj->add($file);
         }
 
 
@@ -308,6 +334,41 @@ class File {
             "filesize_h"=>format_bytes($file->filesize,0)
         );
 
+        return $out;
+    }
+
+    function add($new_file) {
+        $f3 = \Base::instance();
+echo " I AM HERE";
+        $out="";
+        $files_db=new DB\SQL\Mapper($f3->get('DB'),'files');
+
+
+        $out[] = array("Preparing to add a new file to the database:",$new_file);
+        // see if a similar (alternate) entry already exists
+        $alt_file=$files_db->find(
+            array('version_id=? AND quality=? AND path=?',$new_file['version_id'],$new_file['quality'],$new_file['path']),
+            array()
+        );
+
+        if($alt_file) {
+            $out[] = "Notice: skipping, there is already another file in the database (".$alt_file->file_id.") that matches the same version ID, quality, and path that this one was";
+            return false;
+        }
+
+        $files_db->reset();
+        
+        $files_db->version_id = $new_file['version_id'];
+        $files_db->quality = $new_file['quality'];
+        $files_db->complete = $new_file['complete'];
+        $files_db->is_master = $new_file['is_master'];
+        $files_db->path = $new_file['path'];
+        $files_db->source_path = $new_file['source_path'];
+        $files_db->filesize = $new_file['filesize'];
+
+        $files_db->save();
+
+        print_r($out);
         return $out;
     }
 
@@ -370,6 +431,16 @@ class File {
             if(!$sent) echo "Error";
         }
         echo "Did it work? <br />".$path;
+    }
+
+    function is_in_db($dst_path) {
+        $f3 = \Base::instance();
+
+        $files_db=new DB\SQL\Mapper($f3->get('DB'),'files');
+        $file=$files_db->load(array('path=?',$dst_path));
+
+        if($dst_path == $file['path']) return true;
+        else return false;
     }
 
     /*function get_file($file_id) {
