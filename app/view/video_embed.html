@@ -2,17 +2,14 @@ START
 <div class="flowplayer">
     <video>
         <F3:repeat group="{{@files}}" key="{{@file}}" value="{{@val}}">
-            <check if="{{ @val['complete']==1 }}">
-                <!-- <source type="video/mp4"
-                        src="{{ @val['full_path'] }}"> -->
+            <check if="{{ @val['quality'] }} == {{ @default_embed_quality }}">
+                <check if="{{ @val['complete'] }} == 1">
+                     <source type="video/mp4"
+                            src="{{ @base_url }}{{ @embed_url}}/{{ @val['file_id'] }}">
 
+                </check>
             </check>
         </F3:repeat>
-        <source type="application/dash+xml"
-                src="http://allenell.is/clients/media/dash/stream.mpd"
-                debug="true">
-        <source type="video/mp4"
-                src="http://allenell.is/clients/media/test1-360f.mp4">
     </video>
 </div>
 END

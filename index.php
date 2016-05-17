@@ -27,6 +27,7 @@ $f3->set('DB', new DB\SQL(
 require('app/controller/sources.php');
 require('app/controller/cms.php');
 require('app/controller/update.php');
+require('app/controller/push.php');
 
 /* routing functions */
 
@@ -39,6 +40,9 @@ $f3->route('GET /update/populate','update->populate');
 
 $f3->route('GET /@client','cms->client');
 $f3->route('GET /@client/@project', 'cms->project');
+
+$f3->route('GET /embed/@file_id', 'push->embed');
+$f3->route('GET /dl/@file_id', 'push->download');
 
 $f3->route(
     array(

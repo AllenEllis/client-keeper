@@ -247,7 +247,11 @@ class Version {
             // todo security on codem-transcode with tokens to prevent abuse
 
             //$out[] = array("I'm in the foreach loop and I see encoder_option as a ",$encoder_option);
-            $dst_path = $dst_folder . substr($src_filename,0,-4) . " [" . $quality . "]." . $f3->get('encoder_extension');
+            $dst_filename = substr($src_filename,0,-4) . " [" . $quality . "]." . $f3->get('encoder_extension');
+
+            $dst_path = $dst_folder . $dst_filename;
+
+
 
             $data = array(
             "source_file" => $src_path,
@@ -289,6 +293,7 @@ class Version {
                 'quality'=>$quality,
                 'complete'=>0,
                 'is_master'=>0,
+                'filename'=>$dst_filename,
                 'path'=>$dst_path,
                 'source_path'=>$src_path,
                 'filesize'=>'-1'
@@ -298,8 +303,20 @@ class Version {
         }
 
 
+        // Last but not least, add a reference to the master file in the `files` db
 
+        $file = array(
+            'version_id'=>$version['version_id'],
+            'quality'=>"Pro Res 422", // todo autodetect actual master quality
+            'complete'=>1,
+            'is_master'=>1,
+            'filename'=>$src_filename,
+            'path'=>$src_path,
+            'source_path'=>$src_path,
+            'filesize'=>filesize($src_path)
+        );
 
+        $out[] = $file_obj->add($file);
 
         return $out;
     }
@@ -328,8 +345,8 @@ class File {
             "quality"=>$file->quality,
             "complete"=>$file->complete,
             "is_master"=>$file->is_master,
-            "path"=>$file->path,
-            "full_path"=>$f3->get('media_root').'/'.$file->path, // todo check full_path still exists, is sanitized
+            "filename"=>$file->filename,
+            "path"=>$file->path, // todo check full_path still exists, is sanitized
             "filesize"=>$file->filesize,
             "filesize_h"=>format_bytes($file->filesize,0)
         );
@@ -339,7 +356,6 @@ class File {
 
     function add($new_file) {
         $f3 = \Base::instance();
-echo " I AM HERE";
         $out="";
         $files_db=new DB\SQL\Mapper($f3->get('DB'),'files');
 
@@ -362,6 +378,7 @@ echo " I AM HERE";
         $files_db->quality = $new_file['quality'];
         $files_db->complete = $new_file['complete'];
         $files_db->is_master = $new_file['is_master'];
+        $files_db->filename = $new_file['filename'];
         $files_db->path = $new_file['path'];
         $files_db->source_path = $new_file['source_path'];
         $files_db->filesize = $new_file['filesize'];
@@ -424,13 +441,21 @@ echo " I AM HERE";
         $f3 = \Base::instance();
         $web = \Web::instance();
 
-        $path = "/var/www/html/clients/media/".$file['path'];
+        $file_id = $file['file_id'];
+
+        $push = new Push;
+        $push->download(NULL,NULL,$file_id);
+
+        /*
+        $path = $file['path'];
         if(file_exists($path)) {
             $throttle = 0;
             $sent = $web->send($path, NULL, $throttle, TRUE);
             if(!$sent) echo "Error";
+
         }
-        echo "Did it work? <br />".$path;
+        */
+
     }
 
     function is_in_db($dst_path) {

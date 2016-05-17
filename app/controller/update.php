@@ -37,7 +37,7 @@ class update {
         $out[]="Scanning for changes for new client folders";
         for($i=0;$i<count($files);$i++) {
             $match = 0;
-            if($files[$i]== "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "(others)" || $files[$i] == "Allen Ellis" || $files[$i] == "Archive") continue;
+            if($files[$i]== "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "(others)" || $files[$i] == "Allen Ellis" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) continue;
             for($j=0;$j<count($clients);$j++) {
                 if($clients[$j]['client_full']  ==  $files[$i]) {
                     $out[]="Detected: " . $files[$i] . " [already exists]";
@@ -83,7 +83,7 @@ class update {
 
             for ($i = 0; $i < count($files); $i++) {
                 $match = 0;
-                if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive") {
+                if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) {
                     continue;
                 }
                 for ($j = 0; $j < count($projects); $j++) {
@@ -146,7 +146,7 @@ class update {
                     $version_obj = new Version;
                     $versions = $version_obj->get_all($project['project_id']);
 
-                    if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive") {
+                    if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) {
                         continue;
                     }
                     for ($j = 0; $j < count($versions); $j++) {
@@ -237,15 +237,15 @@ class update {
                 }
             } else {
                 if(@file_exists($file->path)) {
-                    // file has mysteriously come back from the dead. Is it the same size it used to be?
                     $filesize = filesize($file->path);
-                    if($filesize == $file->filesize) {
+                    if($filesize == $file->filesize || "-1" == $file->filesize) {
+                        // proceed either if the file is the same size we expected it to be, or is -1 (undetected)
                         $file->complete=1;
                         $file->filesize=$filesize;
                         $file->save();
                         $out[] = "New file marked as complete: " . $file->path;
                     } else {
-                        $out[] ="File has mysteriously come back as a different size, skipping..."
+                        $out[] ="File has mysteriously come back as a different size, skipping...";
                         continue;
                     }
 
