@@ -23,7 +23,7 @@ function parse_version_name($filename) {
 
 
 function json_post($url, $data )
-{
+{ 
     $ch = curl_init( $url );
 # Setup request to send json via POST.
     $payload = json_encode($data );
@@ -36,4 +36,15 @@ function json_post($url, $data )
     curl_close($ch);
 # Print response.
     return $result;
+}
+
+
+function set_client_branding($client) {
+    $f3 = \Base::instance();
+
+    if($client['client_home_url']) {
+        $f3->set('home_url', $client['client_home_url']);
+        $f3->set('home_title', $client['client_home_title']);
+    }
+    return;
 }

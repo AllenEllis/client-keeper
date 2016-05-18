@@ -9,6 +9,22 @@
 
 class push {
 
+    function thumb($f3, $args) {
+        $out = array();
+        $project_obj = new Project;
+        $path = $project_obj->find_thumb($args['project_id']);
+
+        $out[] = array("About to embed this file",$path);
+
+        header("X-Sendfile: $path");
+        header('Content-type: image/jpeg');
+        #header('Content-disposition: attachment; filename="'.$file['filename'].'"');
+        die();
+
+
+    }
+
+
     function embed($f3, $args) {
         $out = array();
         $file_obj = new File;
@@ -17,7 +33,7 @@ class push {
         $out[] = array("About to embed this file",$file);
 
         $path = $file['path'];
-
+ 
         header("X-Sendfile: $path");
         header('Content-type: video/mp4');
         #header('Content-disposition: attachment; filename="'.$file['filename'].'"');

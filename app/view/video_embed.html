@@ -1,20 +1,22 @@
+
 <div class="flowplayer">
     <video>
-        <F3:repeat group="{{@files}}" key="{{@file}}" value="{{@val}}">
-
-                <check if="{{ @val['complete'] }} == 1">
+        <F3:repeat group="{{@_files}}" key="{{@file}}" value="{{@val}}">
+            <check if="{{ @val['quality'] }} == {{ @default_embed_quality }}">
+            <check if="{{ @val['complete'] }} == 1">
                      <source type="video/mp4"
                             src="{{ @base_url }}{{ @embed_url}}/{{ @val['file_id'] }}">
-
                 </check>
-
+                </check>
         </F3:repeat>
     </video>
 </div>
 
+ 
+
 
 <exclude>
-    <check if="{{ @val['quality'] }} == {{ @default_embed_quality }}">
+
 <li>File ID: {{ @val['file_id'] }}</li>
 <li>Version ID: {{ @val['version_id'] }}</li>
 <li>Quality: {{ @val['quality'] }}</li>

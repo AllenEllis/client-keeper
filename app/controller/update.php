@@ -205,7 +205,8 @@ class update {
 
         $out = array();
 
-        // todo loop through all clients, all projects
+        // todo loop through all clients, all projects  
+
         $version_obj = new Version;
         $version = $version_obj->get_all(86);
 
@@ -240,7 +241,7 @@ class update {
                     $filesize = filesize($file->path);
                     if($filesize == $file->filesize || "-1" == $file->filesize) {
                         // proceed either if the file is the same size we expected it to be, or is -1 (undetected)
-                        $file->complete=1;
+                        $file->complete=1; 
                         $file->filesize=$filesize;
                         $file->save();
                         $out[] = "New file marked as complete: " . $file->path;

@@ -40,8 +40,10 @@ $f3->route('GET /update/populate','update->populate');
 
 $f3->route('GET /@client','cms->client');
 $f3->route('GET /@client/@project', 'cms->project');
+$f3->route('GET /@client/@project/@version_name', 'cms->project');
 
-$f3->route('GET /embed/@file_id', 'push->embed');
+$f3->route('GET /thumb/@project_id', 'push->thumb');
+$f3->route('GET /embed/@file_id', 'push->embed'); 
 $f3->route('GET /dl/@file_id', 'push->download');
 
 $f3->route(
