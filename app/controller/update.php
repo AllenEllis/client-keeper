@@ -207,7 +207,7 @@ class update {
 
         // todo loop through all clients, all projects
         $version_obj = new Version;
-        $version = $version_obj->get_all(108);
+        $version = $version_obj->get_all(86);
 
         $out[] = $version_obj->transcode($version[0]);
 

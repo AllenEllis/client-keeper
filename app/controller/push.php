@@ -19,8 +19,8 @@ class push {
         $path = $file['path'];
 
         header("X-Sendfile: $path");
-        header('Content-type: application/octet-stream');
-        header('Content-disposition: attachment; filename="'.$file['filename'].'"');
+        header('Content-type: video/mp4');
+        #header('Content-disposition: attachment; filename="'.$file['filename'].'"');
         die();
 
     }
