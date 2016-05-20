@@ -208,7 +208,7 @@ class update {
         // todo loop through all clients, all projects  
 
         $version_obj = new Version;
-        $version = $version_obj->get_all(86);
+        $version = $version_obj->get_all(109); // 86 for 4-year grad, 108 for sample proj, 109 for sample laser
 
         $out[] = $version_obj->transcode($version[0]);
 

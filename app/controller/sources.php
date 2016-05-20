@@ -48,3 +48,102 @@ function set_client_branding($client) {
     }
     return;
 }
+
+
+function get_video_attributes($video) { // todo remove this function
+    $out = array();
+    $f3 = \Base::instance();
+    $ffprobe_path = $f3->get('ffprobe_path');
+
+    $command = $ffprobe_path . ' "' . $video . '" -v error -show_entries stream=width,height,codec_name,codec_long_name,duration, -of default=noprint_wrappers=1 -print_format json -select_streams v:0 >&1';
+    $output = shell_exec($command);
+
+    $attributes = object_to_array(json_decode($output))['streams'][0];
+    $out[] = array("Attributes are",$attributes);
+
+    return $attributes;
+
+}
+
+function old_get_video_attributes($video) { // todo remove this function
+$out = array();
+    $f3 = \Base::instance();
+    $ffmpeg_path = $f3->get('ffmpeg_path');
+
+    $command = $ffmpeg_path . ' -i "' . $video . '" -vstats 2>&1';
+    $output = shell_exec($command);
+
+    $regex_sizes = "/Video: ([^,]*), ([^,]*), ([0-9]{1,4})x([0-9]{1,4})/";
+    if (preg_match($regex_sizes, $output, $regs)) {
+        $codec = $regs [1] ? $regs [1] : null;
+        $width = $regs [3] ? $regs [3] : null;
+        $height = $regs [4] ? $regs [4] : null;
+    }
+    $out[] = array("Regex_sizes"=>$regs);
+    $regex_duration = "/Duration: ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}).([0-9]{1,2})/";
+    if (preg_match($regex_duration, $output, $regs)) {
+        $hours = $regs [1] ? $regs [1] : null;
+        $mins = $regs [2] ? $regs [2] : null;
+        $secs = $regs [3] ? $regs [3] : null;
+        $ms = $regs [4] ? $regs [4] : null;
+    }
+    $out[] = array(
+    "regex duration"=>$regs);
+    $out[] = array(
+    "Output"=>$output);
+    print_r($out);
+    die;
+
+
+    return array (
+        'command' => $command,
+        'codec' => $codec,
+        'width' => $width,
+        'height' => $height,
+        'hours' => $hours,
+        'mins' => $mins,
+        'secs' => $secs,
+        'ms' => $ms
+    );
+
+}
+
+function object_to_array($data) {
+
+    if (is_object($data)) {
+        $data = get_object_vars($data);
+    }
+
+    if (is_array($data)) {
+        return array_map(__FUNCTION__, $data);
+    }
+    else {
+        return $data;
+    }
+}
+
+// analyzes ffmpeg command, looks for scale: setting, returns that number
+function parse_output_dimensions($encoder_settings,$width,$height) {
+
+    //$encoder_settings ="-c:v libx264 -preset ultrafast -profile:v main -pix_fmt yuv420p -crf 20 -vf scale=640:trunc(ow/a/2)*2 -c:a libfdk_aac -ab 192k -ar 44100 -y -threads 0";
+
+    $aspect_ratio = $width / $height;
+
+     preg_match('/ scale=((\w+))\:/', $encoder_settings, $matches);
+
+    $output_width = $matches[1];
+    $output_height = floor($output_width / $aspect_ratio);
+
+    return array("width"=>$output_width,"height"=>$output_height);
+
+
+}
+
+function parse_video_codec($codec) {
+    $out = "Unknown codec";
+
+    if(preg_match("/prores/",$codec,$matches)) $out = "Pro Res";
+    if(preg_match("/h264/",$codec,$matches)) $out = "H.264";
+
+    return $out;
+}

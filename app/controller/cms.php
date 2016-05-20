@@ -190,8 +190,32 @@ class Version {
         return $versions_db;
     }
 
-    function get($version_id=NULL) {
+    function get($version_id=NULL,$version=NULL) {
 
+        if($version_id) {
+            $f3 = \Base::instance();
+
+            $versions_db = new DB\SQL\Mapper($f3->get('DB'), 'versions');
+            $version = $versions_db->load(array('version_id=?', $version_id), array(
+                'order' => 'timestamp DESC'
+            ));
+        }
+
+        if(!$version) return;
+
+        $out = array(
+            "version_id"=>$version->version_id,
+            "project_id"=>$version->project_id,
+            "version_name"=>$version->version_name,
+            "version_master_filename"=>$version->version_master_filename,
+            "version_master_full_path"=>$version->version_master_full_path,
+            "timestamp"=>$version->timestamp,
+            "datetime"=>date("F j, Y, g:i a",$version->timestamp), // todo, add timestamp calculation here
+            "thumb"=>$version->thumb,
+            "width"=>$version->width,
+            "height"=>$version->height
+        );
+        return $out;
     }
 
     function get_all($project_id) {
@@ -206,23 +230,14 @@ class Version {
         $out = array();
         foreach($versions as $version)
         {
-            $out[] = array(
-                "version_id"=>$version->version_id,
-                "project_id"=>$version->project_id,
-                "version_name"=>$version->version_name,
-                "version_master_filename"=>$version->version_master_filename,
-                "version_master_full_path"=>$version->version_master_full_path,
-                "timestamp"=>$version->timestamp,
-                "datetime"=>date("F j, Y, g:i a",$version->timestamp), // todo, add timestamp calculation here
-                "thumb"=>$version->thumb
-            );
+           $out[] = $this->get(NULL,$version);
         }
 
         return $out;
 
     }
 
-    function render_version_summary($version) {
+    function render_version_summary($version,$current_version=NULL) {
         $f3 = \Base::instance();
         $f3->set('version',$version);
 
@@ -231,6 +246,7 @@ class Version {
 
         $out = "";
         $f3->set('files',$files);
+        if($current_version) $f3->set('current_version',$current_version);
 
         return \Template::instance()->render('version_summary.html');
     }
@@ -249,7 +265,15 @@ class Version {
             $_files[] = $file;
         }
 
+        $data_ratio = 0;
+        $width = $version['width'];
+        $height = $version['height'];
+        if($width && $height) $data_ratio = $height / $width;
+
+        $f3->set('data_ratio',$data_ratio);
+
         $f3->set('_files',$_files);
+        $f3->set('thumb',$f3->get('base_url').$f3->get('thumb_url').'/v/'.$version['version_id']);
 
         $out = \Template::instance()->render('video_embed.html');
 
@@ -271,43 +295,46 @@ class Version {
 
         $out[]= "New dst_folder will be $dst_folder";
 
-        // determine aspect ratio so we can create approriately sized thumbnails
-        /*require_once('lib/getid3/getid3/getid3.php');
-        $getID3 = new getID3;
-        $info = $getID3->analyze($src_path);
-        $width=1280;
-        $height=720;
-        if($info['video']['resolution_x']) {
-            $width = $info['video']['resolution_x'];
-            $height = $info['video']['resolution_y'];
-        }
+        // determine aspect ratio so we can create appropriately sized thumbnails
+        
+        $src_attributes = get_video_attributes($src_path);
 
-        if($width > 1280) {
-            $multiplier = 1280 / $width;
-            $width = ceil($width * $multiplier); 
-            $height = ceil($height * $multiplier);
-        }*/
+        $out[] = array("Video attributes are:",$src_attributes);
 
-        // todo fix thumbnail generation
         $width = 1280;
-        $height = 545;
+        $height = 720;
 
-        $out[] = "Thumbnails will be generated at $width x $height";
+        if($src_attributes['width']) $thumb_width = $width = $src_attributes['width'];
+        if($src_attributes['height']) $thumb_height = $height = $src_attributes['height'];
+
+        $ar = $width / $height;
+        if($width > 1920) {
+            $thumb_width = 1920;
+            $thumb_height = floor($thumb_width / $ar);
+        }
+        $out[] = "Thumbnails will be generated at $thumb_width x $thumb_height"; // todo would be nice if thumbnails are never made larger than 1920x1080
 
         $encoder_options = $f3->get('encoder_options');
-        $thumbnail_percentages = $f3->get('thumbnail_percentages');
+        $thumbnail_seconds = $f3->get('thumbnail_seconds');
         $encoder_url = $f3->get('encoder_url') . "/jobs";
 
         $out[] = array("Encoder options will be",$encoder_options);
-        #$out[] = array("Thumbnail percentages will be",$thumbnail_percentages);
+        #$out[] = array("Thumbnail percentages will be",$thumbnail_seconds);
 
 
         foreach ($encoder_options as $quality=>$encoder_option) {
             // todo security on codem-transcode with tokens to prevent abuse
-            // todo don't encode a 4k version if the source is 1080. Likewise for 720
 
-            //$out[] = array("I'm in the foreach loop and I see encoder_option as a ",$encoder_option);
+            // don't upscale sources
+            $encoder_output_dimensions = parse_output_dimensions($encoder_option,$src_attributes['width'],$src_attributes['height']);
+            if($encoder_output_dimensions['height'] > $height) {
+                $out[] = "Notice: skipping quality ".$quality." because our source is $height. This option would have encoded at {$encoder_output_dimensions['height']}";
+                continue;
+            }
+
             $dst_filename = substr($src_filename,0,-4) . " [" . $quality . "]." . $f3->get('encoder_extension');
+
+            $out[] = array("Encoder output dimesnions expected to be: ",$encoder_output_dimensions);
 
             $dst_path = $dst_folder . $dst_filename;
 
@@ -316,8 +343,8 @@ class Version {
             "destination_file" => $dst_path,
             "encoder_options" => $encoder_option,
             "thumbnail_options" => array(
-                "percentages" => $thumbnail_percentages,
-                "size" => $width."x".$height,
+                "seconds" => $thumbnail_seconds,
+                "size" => $thumb_width."x".$thumb_height,
                 "format" => "jpg"
             ),
             "segments_options" => array(
@@ -333,7 +360,7 @@ class Version {
             }
 
             if(file_exists($dst_path)) {
-                $out[]=array("Notice: destination file already exists [but wasn't in the database yet], skipping",$dst_path);
+                $out[]=array("Notice: destination file already exists [but isn't in the database], skipping",$dst_path);
                 continue;
             }
 
@@ -345,7 +372,6 @@ class Version {
             $out[] = array("Result from encoder:",$result);
 
             // if encoder has begun...
-
             $file = array(
                 'version_id'=>$version['version_id'],
                 'quality'=>$quality,
@@ -354,30 +380,33 @@ class Version {
                 'filename'=>$dst_filename,
                 'path'=>$dst_path,
                 'source_path'=>$src_path,
+                'width'=>$encoder_output_dimensions['width'],
+                'height'=>$encoder_output_dimensions['height'],
                 'filesize'=>'-1'
             );
 
             $out[] = $file_obj->add($file);
         }
 
-
         // Last but not least, add a reference to the master file in the `files` db
-
+        
         $file = array(
             'version_id'=>$version['version_id'],
-            'quality'=>"Pro Res 422", // todo autodetect actual master quality
+            'quality'=>parse_video_codec($src_attributes['codec_name']),
             'complete'=>1,
             'is_master'=>1,
             'filename'=>$src_filename,
             'path'=>$src_path,
             'source_path'=>$src_path,
+            'width'=>$src_attributes['width'],
+            'height'=>$src_attributes['height'],
             'filesize'=>filesize($src_path)
         );
 
         $out[] = $file_obj->add($file);
         
         // add a thumbnail
-        $thumbnail_url = $dst_folder . substr($dst_filename,0,-4) . "-2.jpg"; // todo it isn't always -2
+        $thumbnail_url = $dst_folder . substr($dst_filename,0,-4) . "-5.jpg"; // todo it isn't always -0
         $version_obj = new Version;
         $version_obj=$version_obj->populate($version['version_id']);
 
@@ -386,6 +415,10 @@ class Version {
             $version_obj->thumb = $thumbnail_url;
             $version_obj->save();
         }
+
+        $version_obj->width=$src_attributes['width'];
+        $version_obj->height=$src_attributes['height'];
+        $version_obj->save();
 
 
         return $out;
@@ -417,6 +450,8 @@ class File {
             "is_master"=>$file->is_master,
             "filename"=>$file->filename,
             "path"=>$file->path, // todo check full_path still exists, is sanitized
+            "width"=>$file->width,
+            "height"=>$file->height,
             "filesize"=>$file->filesize,
             "filesize_h"=>format_bytes($file->filesize,0)
         );
@@ -448,10 +483,12 @@ class File {
         $files_db->quality = $new_file['quality'];
         $files_db->complete = $new_file['complete'];
         $files_db->is_master = $new_file['is_master'];
-        $files_db->filename = $new_file['filename'];
         $files_db->path = $new_file['path'];
         $files_db->source_path = $new_file['source_path'];
         $files_db->filesize = $new_file['filesize'];
+        $files_db->filename = $new_file['filename'];
+        $files_db->width = $new_file['width'];
+        $files_db->height = $new_file['height'];
 
         $files_db->save();
 
@@ -577,7 +614,7 @@ class cms {
         foreach ($projects as $project) {
             if($project_obj->is_active($project)) continue; // todo active detection not yet working
 
-            $project['thumb_embed'] = $f3->get('base_url').$f3->get('thumb_url').'/'.$project['project_id'];
+            $project['thumb_embed'] = $f3->get('base_url').$f3->get('thumb_url').'/p/'.$project['project_id'];
 
             $client_projects .= $project_obj->render_project_summary($project);
         }
@@ -611,15 +648,15 @@ class cms {
         $version_obj = new Version;
         $versions = $version_obj->get_all($project['project_id']);
 
-        $projects_versions = "";
+        $newest_version = max($versions);
+
+        $version_summaries = "";
         foreach($versions as $version) {
-            $version_summaries .= $version_obj->render_version_summary($version);
+            $version_summaries .= $version_obj->render_version_summary($version, $args['version_name']?$args['version_name']:$newest_version['version_name']);
         }
 
-        $highest_version = max($versions);
-
         // display the latest version, unless otherwise sepcified
-        $version = $highest_version;
+        $version = $newest_version;
 
         if(@$args['version_name']) {
             // make sure the version they're asking for is actually for this project

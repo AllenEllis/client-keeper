@@ -476,3 +476,35 @@ csmall2 {
 	opacity: .7;
 
 }
+
+h4 .lighter {
+	font-weight: lighter;
+	color: #555;
+}
+
+.current_version {
+	position: relative;
+	font-weight: bold;
+}
+
+.current_version a {
+	color: #0c4271;
+}
+
+/*replace the content value with the
+corresponding value from the list below*/
+
+.current_version:before {
+	content: "\f138";
+	font-family: FontAwesome;
+	font-style: normal;
+	font-weight: normal;
+	text-decoration: inherit;
+	/*--adjust as necessary--*/
+	color: #0c4271;
+	font-size: 18px;
+	padding-right: 0.5em;
+	position: absolute;
+	top: 0;
+	left: -23px;
+}
