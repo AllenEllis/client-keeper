@@ -83,7 +83,7 @@ class update {
 
             for ($i = 0; $i < count($files); $i++) {
                 $match = 0;
-                if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) {
+                if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" || $files[$i] == "Stock Footage" ) {
                     continue;
                 }
                 for ($j = 0; $j < count($projects); $j++) {
@@ -146,9 +146,13 @@ class update {
                     $version_obj = new Version;
                     $versions = $version_obj->get_all($project['project_id']);
 
+                    $extension = strtolower(substr($files[$i],-3));
+
                     if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) {
                         continue;
                     }
+                    if ($extension != "mp4" && $extension != "mov") continue;
+
                     for ($j = 0; $j < count($versions); $j++) {
                         if ($versions[$j]['version_master_filename'] == $files[$i]) {
                             $match = 1;
@@ -180,47 +184,77 @@ class update {
         return($out);
     }
 
+    function update_all() {
+        set_time_limit(1200);
+        echo "Running update: <pre>";
+        $out = array();
+        $out[] = $this->crawl();
+        $out[] = $this->transcode();
+        $out[] = $this->populate();
+        print_r($out);
+    }
 
-    function crawl($f3,$args) {
-        //$view=new View;
-        //echo $view->render('home.html');
-
-        echo "\r\nCrawling project folders\r\n<pre>";
+    function crawl() {
 
         $out = array();
-
+        $out[] = "Crawling project folders";
         $obj = new update;
 
         $out[] = $obj->crawl_client_folders();
         $out[] = $obj->crawl_project_folders();
         $out[] = $obj->crawl_drafts_folders();
 
-        print_r($out);
+        return($out);
 
     }
 
-    function transcode($f3,$args) {
-        echo "\r\nTranscoding project folders\r\n<pre>";
-
-
+    function transcode() {
         $out = array();
+        $out[] = "Transcoding project folders";
 
+/*
         // todo loop through all clients, all projects  
 
         $version_obj = new Version;
-        $version = $version_obj->get_all(109); // 86 for 4-year grad, 108 for sample proj, 109 for sample laser
+        $version = $version_obj->get_all(85); // 86 for 4-year grad, 108 for sample proj, 109 for sample laser
 
-        $out[] = $version_obj->transcode($version[0]);
+        #$out[] = array("I would have transcoded",$version);
 
-        print_r($out);
+*/
+        $f3 = \Base::instance();
+        $client_obj = new Client;
+        $project_obj = new Project;
+        $version_obj = new Version;
+
+        $clients = $client_obj->get_all();
+
+        foreach($clients as $client) {
+            $projects = $project_obj->get_all($client['client_id']);
+            foreach($projects as $project) {
+                $versions = $version_obj->get_all($project['project_id']);
+                foreach($versions as $version) {
+                    if($f3->get('transcoder_full') == 1) {
+                        $out [] = array("Transcoder is full, aborting all future transcodes. Adavancing to population step.");
+                        break;
+                    }
+                    $out[] = $version_obj->transcode($version);
+                }
+            }
+        }
+
+
+        return($out);
 
     }
 
-    function populate($f3,$args) {
-        echo "\r\nPopulating finished file columns with processed videos\r\n<pre>";
+    function populate() {
 
         $out = array();
 
+        $out[] = "Populating finished file columns with processed videos";
+
+
+        $f3 = \Base::instance();
         $files_db=new DB\SQL\Mapper($f3->get('DB'),'files');
         $files=$files_db->find(array(),array('order' => 'path ASC'));
 
@@ -257,7 +291,7 @@ class update {
             }
         }
 
-        print_r($out);
+        return($out);
     }
 
 

@@ -8,8 +8,8 @@
 	URL: http://alvarez.is
 	
 ################################################################# */ 
-@import url(http://fonts.googleapis.com/css?family=Raleway:400,700,900);
-@import url(http://fonts.googleapis.com/css?family=Lato:400,900);
+@import url(//fonts.googleapis.com/css?family=Raleway:400,700,900);
+@import url(//fonts.googleapis.com/css?family=Lato:400,900);
 @import url("prettyPhoto.css") screen;
 @import url("hoverex-all.css") screen;
 
@@ -259,16 +259,22 @@ a:focus {
 
 .portfolio-item .title:before {border-radius:0; display:none}
 .portfolio-item p {margin:0px 0 30px;}
-.portfolio-item h3 {margin:-10px 0 10px; font-size:16px; text-transform:uppercase;}
+/*.portfolio-item h3 {margin:-10px 0 10px; font-size:16px; text-transform:uppercase;}*/
+.portfolio-item h3 {margin:0; padding: 0; display:table-cell; font-size:16px; text-transform:uppercase;}
 
+.tpl6 img {
+	/*max-height: 100%;*/
+	/*max-width: initial;*/
+}
 
 .tpl6 h3
 {
 	color:#fff;
 	margin:0;
-	padding:40px 5px 0;
+	/*padding:40px 5px 0;*/
 	font-size:16px;
 	text-transform:uppercase;
+	vertical-align: middle;
 }
 .tpl6 .dmbutton
 {
@@ -282,8 +288,20 @@ a:focus {
 	height:100%;
 	width:100%;
 	background-color:#00b3fe;
-	background-color:rgba(0,179,254,.9);
+	/*background-color:rgba(0,179,254,.3);*/
+	background-color:rgba(100,100,100,.5);
 	text-align:center;
+	display:table;
+	vertical-align: middle;
+	transition-property: background-color;
+	transition-duration: .5s;
+	transition-timing-function: ease;
+}
+.tpl6 .bg:hover {
+	background-color:rgba(100,100,100,.8);
+	transition-property: background-color;
+	transition-duration: .5s;
+	transition-timing-function: ease;
 }
 
 /* Testimonials Wrap */

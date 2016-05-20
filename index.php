@@ -31,9 +31,11 @@ require('app/controller/push.php');
 
 /* routing functions */
 
-$f3->route('GET /','cms->home');
+$f3->route('GET /','cms->bounce');
+$f3->route('GET /allenhome','cms->home');
 $f3->route('GET /about','cms->about');
 
+$f3->route('GET /update','update->update_all');
 $f3->route('GET /update/crawl','update->crawl');
 $f3->route('GET /update/transcode','update->transcode');
 $f3->route('GET /update/populate','update->populate');

@@ -5,11 +5,38 @@
 <div id="blue">
     <div class="container">
         <div class="row">
-            <h3>{{ @client[client_full] }} <span style="font-weight:lighter">| All Projects</span></h3>
+            <h3>{{ @client[client_full] }}</h3>
         </div><!-- /row -->
     </div> <!-- /container -->
 </div><!-- /blue -->
 
-{{ @client_projects | raw }}
+
+<div class="container mtb">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 centered">
+            <h2>Past projects are available below</h2>
+            <br>
+            <div class="hline"></div>
+        </div>
+    </div>
+</div><! --/container -->
+
+<!-- *****************************************************************************************************************
+	 PORTFOLIO SECTION
+	 ***************************************************************************************************************** -->
+<div id="portfoliowrap">
+    <div class="portfolio-centered">
+        <div class="recentitems portfolio">
+
+
+            {{ @client_projects | raw }}
+
+        </div><!-- portfolio -->
+    </div><!-- portfolio container -->
+</div><!--/Portfoliowrap -->
+
+
+
+
 
 <include href="footer.html" />

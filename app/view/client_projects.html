@@ -1,8 +1,13 @@
 
-
-<a href="http://allenell.is/clients/{{ @client['client_short'] }}/{{ @project['project_short'] }}">
-    {{ @project['project_full'] }}
-<img src="{{ @project['thumb_embed'] }}" />
-</a>
-<hr />
-
+<div class="portfolio-item graphic-design">
+    <div class="he-wrap tpl6">
+        <img src="{{ @project['thumb_embed'] }}" alt="">
+        <div class="he-view">
+            <a href="{{ @base_url}}/{{ @client['client_short'] }}/{{ @project['project_short'] }}">
+                <div class="bg" style="visibility: visible">
+                    <h3>{{ @project['project_full'] }}</h3>
+                </div><!-- he bg -->
+            </a>
+        </div><!-- he view -->
+    </div><!-- he wrap -->
+</div><!-- end col-12 -->

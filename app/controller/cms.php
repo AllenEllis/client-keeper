@@ -285,7 +285,11 @@ class Version {
         $out = array();
         $file_obj = new File;
 
-        //$file = $file_obj->get_all($version['version_id']);
+        $extension = substr($version['version_master_filename'],-3);
+        if($extension != "mp4" && $extension != "mov") {
+            $out[] = array("Notice: can't transcode this file, it's not an mp4 or mov",$version);
+            return FALSE;
+        }
 
         $out[] = array("Preparing to transcode version #". $version['version_id'],$version);
 
@@ -370,6 +374,12 @@ class Version {
 
             $result = json_post($encoder_url,$data);
             $out[] = array("Result from encoder:",$result);
+
+            if($result == "{\"message\":\"The transcoder is not accepting jobs right now. Please try again later.\"}") {
+                $out[] = array("Transcoder is busy, try again later");
+                $f3->set('transcoder_full',1);
+                break;
+            }
 
             // if encoder has begun...
             $file = array(
@@ -710,6 +720,10 @@ class cms {
         $file_obj->download($file);
 
 
+    }
+
+    function bounce() {
+        header("Location:http://allenellis.com");
     }
 
 

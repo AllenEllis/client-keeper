@@ -127,7 +127,8 @@ function parse_output_dimensions($encoder_settings,$width,$height) {
 
     //$encoder_settings ="-c:v libx264 -preset ultrafast -profile:v main -pix_fmt yuv420p -crf 20 -vf scale=640:trunc(ow/a/2)*2 -c:a libfdk_aac -ab 192k -ar 44100 -y -threads 0";
 
-    $aspect_ratio = $width / $height;
+    $aspect_ratio = 16/9;
+    if($height != 0) $aspect_ratio = $width / $height;
 
      preg_match('/ scale=((\w+))\:/', $encoder_settings, $matches);
 
@@ -144,6 +145,7 @@ function parse_video_codec($codec) {
 
     if(preg_match("/prores/",$codec,$matches)) $out = "Pro Res";
     if(preg_match("/h264/",$codec,$matches)) $out = "H.264";
+    if(preg_match("/mjpeg/",$codec,$matches)) $out = "QuickTime Motion JPEG";
 
     return $out;
 }
