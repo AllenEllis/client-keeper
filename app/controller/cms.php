@@ -294,6 +294,12 @@ class Version {
         $out[] = array("Preparing to transcode version #". $version['version_id'],$version);
 
         $src_path = $version['version_master_full_path'];
+
+        if(!@file_exists($src_path)) {
+		$out[] = array("Error: file doesn't exist, can't transcode",$src_path);
+		return FALSE;
+	}
+
         $src_filename = $version['version_master_filename'];
         $dst_folder = substr($src_path,0,-strlen($src_filename)) . $f3->get('transcodes_subfolder').'/';
 
