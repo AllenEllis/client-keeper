@@ -16,6 +16,7 @@ $f3->mset(array(
     "site.url" => $f3->get("SCHEME") . "://" . $f3->get("HOST") . $f3->get("BASE") . "/"
 ));
 $f3->config("config.ini");
+$f3->config("passwords.ini");
 
 // db connection
 $f3->set('DB', new DB\SQL(
