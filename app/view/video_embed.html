@@ -1,6 +1,6 @@
 
 <div class="flowplayer"<check if="{{ @data_ratio }} != 0"> data-ratio="{{ @data_ratio }}"</check>>
-    <video poster="{{ @thumb }}" style="background-color: black">
+    <video preload controls poster="{{ @thumb }}" style="background-color: black">
         <F3:repeat group="{{@_files}}" key="{{@file}}" value="{{@val}}">
 
             <check if="{{ @val['complete'] }} == 1">
