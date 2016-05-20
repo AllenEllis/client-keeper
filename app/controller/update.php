@@ -186,11 +186,23 @@ class update {
 
     function update_all() {
         set_time_limit(1200);
+	$starttime = microtime(TRUE);
         echo "Running update: <pre>";
         $out = array();
+	$out[] = "Starting time: $starttime";
         $out[] = $this->crawl();
+	$crawltime = microtime(TRUE);
+	$out[] = array("Time spent crawling: ",$crawltime - $starttime);
         $out[] = $this->transcode();
+	$tctime = microtime(TRUE);
+	$out[] = array("Time spent transcoding: ",$tctime - $crawltime);
         $out[] = $this->populate();
+	$poptime = microtime(TRUE);
+	$endtime = microtime(TRUE);
+	$runtime = $endtime - $starttime;
+	$out[] = array("Time spent populating: ",$poptime-$tctime);
+	$out[] = "Ending time: $endtime";
+	$out[] = "Total run-time: $runtime";
         print_r($out);
     }
 
@@ -237,6 +249,7 @@ class update {
                         $out [] = array("Transcoder is full, aborting all future transcodes. Adavancing to population step.");
                         break;
                     }
+		    if($version['transcoded']) continue;
                     $out[] = $version_obj->transcode($version);
                 }
             }

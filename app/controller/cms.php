@@ -213,7 +213,8 @@ class Version {
             "datetime"=>date("F j, Y, g:i a",$version->timestamp), // todo, add timestamp calculation here
             "thumb"=>$version->thumb,
             "width"=>$version->width,
-            "height"=>$version->height
+            "height"=>$version->height,
+	    "transcoded"=>$version->transcoded
         );
         return $out;
     }
