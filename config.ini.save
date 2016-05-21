@@ -1,0 +1,34 @@
+[globals]
+
+DEBUG=3
+;UI=ui/
+
+; Database
+db.host=localhost
+db.port=3306
+db.user=root
+db.pass=
+db.name=allen_clients
+
+;media_root="/var/www/html/clients/media"
+base_url="https://allenell.is/clients"
+embed_url="/embed"
+thumb_url="/thumb"
+media_root="https://allenell.is/clients/media"
+default_embed_quality="1080"
+
+
+ffmpeg_path="/home/allen/bin/ffmpeg"
+ffprobe_path="/home/allen/bin/ffprobe"
+project_root="/var/www/projects"
+transcodes_subfolder="Transcodes"
+encoder_url="http://localhost:8089"
+encoder_options["360"]="-c:v libx264 -preset ultrafast -profile:v main -pix_fmt yuv420p -crf 20 -vf scale=640:trunc(ow/a/2)*2 -c:a libfdk_aac -ab 192k -ar 44100 -y -threads 0"
+encoder_options["720"]="-c:v libx264 -preset slow -profile:v main -pix_fmt yuv420p -crf 18 -vf scale=1280:trunc(ow/a/2)*2 -c:a libfdk_aac -ab 192k -ar 44100 -y -threads 0"
+encoder_options["1080"]="-c:v libx264 -preset veryslow -profile:v main -pix_fmt yuv420p -crf 17 -vf scale=1920:trunc(ow/a/2)*2 -c:a libfdk_aac -ab 192k -ar 44100 -y -threads 0"
+encoder_options["2160"]="-c:v libx264 -preset veryslow -profile:v main -pix_fmt yuv420p -crf 15 -vf scale=3840:trunc(ow/a/2)*2 -c:a libfdk_aac -ab 192k -ar 44100 -y -threads 0"
+;encoder_options["720"]="-acodec libfdk_aac -ab 96k -ar 44100 -vcodec libx264 -vb 4096k -vf scale=1280:trunc(ow/a/2)*2 -y -threads 0"
+;encoder_options["1080"]="-acodec libfaac -ab 96k -ar 44100 -vcodec libx264 -vb 416k scale=1920:trunc(ow/a/2)*2 -y -threads 0" ; 12
+;encoder_options["2160"]="-acodec libfaac -ab 96k -ar 44100 -vcodec libx264 -vb 416k scale=3840:trunc(ow/a/2)*2 -y -threads 0" ; 20
+encoder_extension="mp4"
+thumbnail_seconds="3","5","10","20","30","40","50","60","70","80","90"

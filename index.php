@@ -33,6 +33,7 @@ require('app/controller/push.php');
 /* routing functions */
 
 $f3->route('GET /','cms->bounce');
+$f3->route('GET /vendorlist','cms->vendorlist');
 $f3->route('GET /allenhome','cms->home');
 $f3->route('GET /about','cms->about');
 

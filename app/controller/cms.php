@@ -6,6 +6,59 @@
  * Time: 8:43 PM
  */
 
+class Vendor {
+    var $vendor_id;
+    var $name;
+    var $website;
+    var $address;
+    var $about;
+    var $contact_info;
+    var $social_media;
+
+    var $vendor_db;
+
+    function get($vendor_id) {
+        $f3 = \Base::instance();
+        $this->vendor_db=new DB\SQL\Mapper($f3->get('DB'),'vendors');
+        $db=$this->vendor_db->load(array('vendor_id=?',$vendor_id));
+
+        $this->vendor_id = $db->vendor_id;
+        $this->name = $db->name;
+        $this->website = $db->website;
+        $this->address = $db->address;
+        $this->about = $db->about;
+        $this->contact_info = $db->contact_info;
+        $this->social_media = json_decode($db->social_media);
+
+    }
+
+    function dump_vars() {
+        $out = object_to_array($this);
+        unset($out['vendor_db']);
+        return $out;
+    }
+
+   /* function encode_social_media($array=NULL) {
+        $allen = array(
+            "facebook"=>"allenellis",
+            "twitter"=>"allenellis",
+            "instagram"=>"allenellis"
+        );
+        $refractive = array(
+            "facebook"=>"RefractiveFilms",
+            "twitter"=>"",
+            "instagram"=>"refractivefilms",
+            "vimeo"=>"refractivefilms"
+        );
+        $allegheny = array(
+            "facebook"=>"alleghenyimagefactory",
+            "vimeo"=>"alleghenyimagefactory"
+        );
+
+        return json_encode($allegheny);
+    }*/
+
+}
 
 class Client {
 
@@ -26,7 +79,8 @@ class Client {
             "client_full"=> $clients->client_full,
             "client_url"=>$f3->get('site.url').$client_short,
             "client_home_url"=>$clients->client_home_url,
-            "client_home_title"=>$clients->client_home_title
+            "client_home_title"=>$clients->client_home_title,
+            "vendor_id"=>$clients->vendor_id
 
         );
 
@@ -615,7 +669,7 @@ class cms {
     }
 
     function about() {
-        echo "About me";
+
     }
 
 
@@ -636,10 +690,16 @@ class cms {
             $client_projects .= $project_obj->render_project_summary($project);
         }
 
+        // get vendor info
+        $vendor = new Vendor;
+        $vendor->get($client['vendor_id']);
+        $vendor_array = $vendor->dump_vars();
+
         // render output
         $f3->set('projects',$projects);
         $f3->set('client_projects',$client_projects);
         $f3->set('title',$client['client_full']);
+        $f3->set('vendor',$vendor_array);
 
         set_client_branding($client);
 
@@ -683,6 +743,13 @@ class cms {
                 }
             }
         }
+
+
+        // get vendor info
+        $vendor = new Vendor;
+        $vendor->get($client['vendor_id']);
+        $vendor_array = $vendor->dump_vars();
+        $f3->set('vendor',$vendor_array);
 
         // compile download links
         $file_obj = new File;
@@ -733,5 +800,16 @@ class cms {
         header("Location:http://allenellis.com");
     }
 
+    function vendorlist() {
+        echo "<pre>";
+        $out = array();
+        $vendor = new Vendor;
+        $vendor->get(3);
+        $vars = $vendor->dump_vars();
+        $out[] = array("Variables are",$vars);
+        print_r($out);
+
+
+    }
 
 }
