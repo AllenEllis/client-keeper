@@ -149,3 +149,34 @@ function parse_video_codec($codec) {
 
     return $out;
 }
+
+function float_to_percent($float) {
+    $percent = $float * 100;
+    $percent = round($percent,0);
+    $percent .= "%";
+    return $percent;
+}
+
+function is_mobile() {
+    // Include and instantiate the class.
+    require_once 'Mobile_Detect.php';
+    $detect = new Mobile_Detect;
+
+// Any mobile device (phones or tablets).
+    if ( $detect->isMobile() ) {
+        return true;
+    }
+
+// Any tablet device.
+    if( $detect->isTablet() ){
+        return true;
+    }
+
+     /// more documentation at http://mobiledetect.net/
+}
+
+function sanitize_status($status) {
+    if($status == 'tc') $status = "transcoding";
+    if($status != 'failed' && $status != 'success') $status = 'transcoding';
+    return $status;
+}

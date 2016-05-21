@@ -308,4 +308,104 @@ class update {
     }
 
 
+    function status($f3,$args) {
+        
+        $jobs = new Job;
+        
+        $status = sanitize_status($args['status']);
+
+        $active_jobs = $jobs->get_all($status);
+
+        $jobs_array = array();
+
+        foreach($active_jobs as $key=>$active_job) {
+            $job = $active_job->cast();
+            $job['progress'] = float_to_percent($job['progress']);
+            $job['opts'] = json_decode($job['opts'],true);
+            $jobs_array[$key] = $job;
+        }
+
+        $vendor = new Vendor;
+        $vendor->get($f3->get('default_vendor'));
+        $f3->set('jobs',$jobs_array);
+        $f3->set('vendor',$vendor->dump_vars());
+        $f3->set('status',$status);
+        $job_rows = \Template::instance()->render('job_rows.html');
+        $f3->set('job_rows',$job_rows);
+        echo \Template::instance()->render('status.html');
+
+    }
+
+}
+
+
+class Job {
+    var $job_id;
+    var $internalId;
+    var $status;
+    var $progress;
+    var $duration;
+    var $filesize;
+    var $opts;
+    var $message;
+    var $createdAt;
+    var $updatedAt;
+    var $thumbnails;
+    var $playlist;
+    var $segments;
+
+    var $jobs;
+
+    function get($job_id=NULL, $job=NULL) {
+
+        if($job == NULL) {
+            $f3 = \Base::instance();
+            $this->job_db=new DB\SQL\Mapper($f3->get('DBD'),'Jobs');
+            $job=$this->job_db->load(array('job_id=?',$job_id));
+        }
+
+        $this-> $job_id = $job->job_id;
+        $this-> $internalId = $job->internalId;
+        $this-> $status = $job->status;
+        $this-> $progress = $job->progress;
+        $this-> $duration = $job->duration;
+        $this-> $filesize = $job->filesize;
+        $this-> $opts = $job->opts;
+        $this-> $message = $job->message;
+        $this-> $createdAt = $job->createdAt;
+        $this-> $updatedAt = $job->updatedAt;
+        $this-> $thumbnails = $job->thumbnails;
+        $this-> $playlist = $job->playlist;
+        $this-> $segments = $job->segments;
+    }
+
+    function get_all($status) {
+
+        $f3 = \Base::instance();
+
+        $status = sanitize_status($status);
+
+        $job = new DB\SQL\Mapper($f3->get('DBT'),'Jobs');
+        $list = $job->find('status="'.$status.'"',array('order'=>'id desc'));
+
+        return $list;
+        /*
+
+
+
+
+        $this->job_db=new DB\SQL\Mapper($f3->get('DBT'),'Jobs');
+        $jobs=$this->job_db->find(array('status','failed'));
+        $jobs=array();
+        foreach ($jobs as $key => $job) {
+            $this->jobs[$key] = $job;
+        }*/
+    }
+
+    function dump_vars() {
+        $out = object_to_array($this);
+        unset($out['job_db']);
+        return $out;
+    }
+
 }

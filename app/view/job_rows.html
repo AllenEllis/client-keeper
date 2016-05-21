@@ -1,0 +1,15 @@
+<F3:repeat group="{{@jobs}}" key="{{@key}}" value="{{@job}}">
+    <tr>
+        <td>{{$job['id']}}</td>
+        <td>{{$job['status']}}</td>
+        <td>{{$job['progress']}}</td>
+        <td>
+            <p>{{$job['message']}}</p>
+            <div class="extra">
+                <p><strong>source_file:</strong> {{$job['opts']['source_file']}}</p>
+                <p><strong>destination_file:</strong> {{$job['opts']['destination_file']}}</p>
+                <p><strong>encoder_options:</strong> <tt>{{$job['opts']['encoder_options']}}</tt></p>
+            </div>
+        </td>
+    </tr>
+</F3:repeat>

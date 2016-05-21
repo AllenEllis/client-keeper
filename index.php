@@ -25,6 +25,12 @@ $f3->set('DB', new DB\SQL(
      $f3->get("db.pass")
 ));
 
+$f3->set('DBT', new DB\SQL(
+    'mysql:host=localhost;port=3306;dbname=allen_transcoder',
+    $f3->get("db.user"),
+    $f3->get("db.pass")
+));
+
 require('app/controller/sources.php');
 require('app/controller/cms.php');
 require('app/controller/update.php');
@@ -36,6 +42,9 @@ $f3->route('GET /','cms->bounce');
 $f3->route('GET /vendorlist','cms->vendorlist');
 $f3->route('GET /allenhome','cms->home');
 $f3->route('GET /about','cms->about');
+
+$f3->route('GET /status','update->status');
+$f3->route('GET /status/@status','update->status');
 
 $f3->route('GET /update','update->update_all');
 $f3->route('GET /update/crawl','update->crawl');

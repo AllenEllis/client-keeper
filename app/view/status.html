@@ -1,0 +1,57 @@
+<include href="header.html" />
+<!-- *****************************************************************************************************************
+ BLUE WRAP
+ ***************************************************************************************************************** -->
+<div id="blue">
+    <div class="container">
+        <div class="row">
+            <h3>{{ @client[client_full] }}</h3>
+        </div><!-- /row -->
+    </div> <!-- /container -->
+</div><!-- /blue -->
+
+
+<div class="container mtb">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 centered">
+            <h2><check if="{{@status == 'success'}}">Sucessful jobs</check>
+                <check if="{{@status == 'failed'}}">Failed jobs</check>
+                <check if="{{@status == 'transcoding'}}">Currently transcoding</check>
+                </h2>
+            <br>
+            <div class="hline"></div>
+            <div class="status-links">
+                <p><a href="{{@base_url}}/status/success">Success</a> &middot;
+                <a href="{{@base_url}}/status/transcoding">Transcoding</a> &middot;
+                <a href="{{@base_url}}/status/failed">Failed</a></p>
+            </div>
+        </div>
+    </div>
+</div><! --/container -->
+
+<!-- *****************************************************************************************************************
+	 JOB SECTION
+	 ***************************************************************************************************************** -->
+
+<table style="width: 90%;margin: auto" class="table_fill">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Status</th>
+        <th>%</th>
+        <th>Message</th>
+    </tr>
+    </thead>
+    <tbody>
+        {{ @job_rows | raw }}
+    </tbody>
+</table>
+
+
+
+
+<br /><br />
+
+
+
+<include href="footer.html" />

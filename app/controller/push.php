@@ -64,8 +64,14 @@ class push {
         $path = $file['path'];
 
         header("X-Sendfile: $path");
-        header('Content-type: application/octet-stream');
-        header('Content-disposition: attachment; filename="'.$file['filename'].'"');
+
+        if(is_mobile()) {
+            header("X-Sendfile: $path");
+            header('Content-type: video/mp4');
+        } else {
+            header('Content-type: application/octet-stream');
+            header('Content-disposition: attachment; filename="' . $file['filename'] . '"');
+        }
         die();
 
     }
