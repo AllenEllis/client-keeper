@@ -2,6 +2,8 @@
 Versioning is screwed up for whitetie/flex
 
 # Features
+NEED a way to pause the update function
+
 Ability to abort all jobs for a given version. Should move all impacted files to a /archive directory
 
 Embedded player should be smarter about prioritizing which file is embedded OR Proper HLS adaptive streaming

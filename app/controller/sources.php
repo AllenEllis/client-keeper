@@ -176,7 +176,7 @@ function is_mobile() {
 }
 
 function sanitize_status($status) {
-    if($status == 'tc') $status = "transcoding";
-    if($status != 'failed' && $status != 'success') $status = 'transcoding';
+    if($status == 'tc') $status = "processing";
+    if($status != 'failed' && $status != 'success') $status = 'processing';
     return $status;
 }
