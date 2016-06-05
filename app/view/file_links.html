@@ -1,15 +1,15 @@
-<F3:repeat group="{{@jobs}}" key="{{@key}}" value="{{@job}}">
-
+<F3:repeat group="{{@files}}" key="{{@key}}" value="{{@val}}">
+    <check if="{{ @val['complete']==1 }}">
         <p><a class="btn btn-success" href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/dl/{{ @val['version_id'] }}/{{ @val['quality'] }}">
             <span class="glyphicon glyphicon-download"></span>
             {{ @val['quality'] }} <span class="small">&mdash; {{ @val['filesize_h'] }}</span>
         </a>
         </p>
-
+</check>
 </F3:repeat>
 
 <exclude>
-    <check if="{{ @val['complete']==1 }}"></check>
+
 <li>File ID: {{ @val['file_id'] }}</li>
 <li>Version ID: {{ @val['version_id'] }}</li>
 <li>Quality: {{ @val['quality'] }}</li>
