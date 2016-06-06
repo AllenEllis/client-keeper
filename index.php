@@ -71,5 +71,34 @@ $f3->route(
 
 
 
-
 $f3->run();
+
+
+// log visitor
+$line = date('Y-m-d H:i:s') . ", $_SERVER[REMOTE_ADDR], ".$_SERVER['REQUEST_URI'].", ".$_SERVER['HTTP_REFERER'];
+@file_put_contents('hits.log', $line . PHP_EOL, FILE_APPEND);
+
+
+include('php-pushover/Pushover.php');
+
+$ip = $_SERVER['REMOTE_ADDR'];
+
+if($ip != "10.10.10.1") {
+    $push = new Pushover();
+    $push->setToken('ax583zqspqdn6ssupdsowq5uo3kwos');
+    $push->setUser('uuet8bfx4sdt7y57x8sjkhgcbrt85b');
+    $push->setTitle('Video hit: ' . substr(urldecode($_SERVER['REQUEST_URI']),9));
+    $push->setMessage('By '.$ip);
+    $push->setUrl('http://allenell.is/clients/hits.php');
+    $push->setUrlTitle('Client hit log');
+    $push->setDevice('ap');
+    $push->setPriority(0);
+    $push->setRetry(0); //Used with Priority = 2; Pushover will resend the notification every 60 seconds until the user accepts.
+    $push->setExpire(0); //Used with Priority = 2; Pushover will resend the notification every 60 seconds for 3600 seconds. After that point, it stops sending notifications.
+    $push->setCallback('');
+    $push->setTimestamp(time());
+    $push->setDebug(false);
+    $push->setSound('');
+    $go = @$push->send();
+}
+

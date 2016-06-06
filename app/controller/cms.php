@@ -519,6 +519,7 @@ class File {
             "quality"=>$file->quality,
             "complete"=>$file->complete,
             "is_master"=>$file->is_master,
+            "hidden"=>$file->hidden,
             "filename"=>$file->filename,
             "path"=>$file->path, // todo check full_path still exists, is sanitized
             "width"=>$file->width,
@@ -584,6 +585,7 @@ class File {
                 "version_id"=>$version_id,
                 "quality"=>$file->quality,
                 "complete"=>$file->complete,
+                "hidden"=>$file->hidden,
                 "is_master"=>$file->is_master,
                 "path"=>$file->path,
                 "full_path"=>$f3->get('media_root').'/'.$file->path, // todo check full_path still exists, is sanitized

@@ -5,6 +5,8 @@
  * Date: 5/15/2016
  * Time: 6:41 PM
  */
+
+
 function shorten($name_full) {
     $out = str_replace(')','',str_replace('(','',str_replace(' ', '', strtolower($name_full))));
     return $out;

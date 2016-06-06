@@ -1,11 +1,13 @@
 <F3:repeat group="{{@files}}" key="{{@key}}" value="{{@val}}">
     <check if="{{ @val['complete']==1 }}">
-        <p><a class="btn btn-success" href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/dl/{{ @val['version_id'] }}/{{ @val['quality'] }}">
-            <span class="glyphicon glyphicon-download"></span>
-            {{ @val['quality'] }} <span class="small">&mdash; {{ @val['filesize_h'] }}</span>
-        </a>
-        </p>
-</check>
+        <check if="{{ @val['hidden']!=1 }}">
+            <p><a class="btn btn-success" href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/dl/{{ @val['version_id'] }}/{{ @val['quality'] }}">
+                <span class="glyphicon glyphicon-download"></span>
+                {{ @val['quality'] }} <span class="small">&mdash; {{ @val['filesize_h'] }}</span>
+            </a>
+            </p>
+        </check>
+    </check>
 </F3:repeat>
 
 <exclude>
