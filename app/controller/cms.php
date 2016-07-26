@@ -275,14 +275,15 @@ class Version {
         return $out;
     }
 
-    function get_all($project_id) {
+    function get_all($project_id,$order_by="date") {
         // todo error checking for bad project_id
         $f3 = \Base::instance();
 
+        if($order_by=="date") $_order_by = array('order'=>'timestamp DESC');
+        if($order_by=="alpha") $_order_by = array('order'=>'version_name ASC');
+
         $versions_db=new DB\SQL\Mapper($f3->get('DB'),'versions');
-        $versions=$versions_db->find(array('project_id=?',$project_id),array(
-            'order' => 'timestamp DESC'
-        ));
+        $versions=$versions_db->find(array('project_id=?',$project_id),$_order_by);
 
         $out = array();
         foreach($versions as $version)
@@ -724,20 +725,23 @@ class cms {
         $project_obj = new Project;
         $projects = $project_obj->get_all($client['client_id']);
 
+        $order_by = "alpha";
+        if($project['drafts']){
+            $f3->set('version_text',"Version ");
+            $order_by = "date";
+        }
+
         // find all versions
 
         $version_obj = new Version;
-        $versions = $version_obj->get_all($project['project_id']);
+        $versions = $version_obj->get_all($project['project_id'],$order_by);
 
         $newest_version = max($versions);
 
-        if($project['drafts']){
-            $f3->set('version_text',"Version ");
-        }
 
         $version_summaries = "";
         foreach($versions as $version) {
-            $version_summaries .= $version_obj->render_version_summary($version, $args['version_name']?$args['version_name']:$newest_version['version_name']);
+            $version_summaries .= $version_obj->render_version_summary($version, $args['version_name']?$args['version_name']:$newest_version['version_name'],$order_by);
         }
 
         // display the latest version, unless otherwise sepcified
