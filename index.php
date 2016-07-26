@@ -83,7 +83,7 @@ include('php-pushover/Pushover.php');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-if($ip != "10.10.10.1") {
+if($ip != "10.10.10.1" && $ip != "10.10.10.81") {
     $push = new Pushover();
     $push->setToken('ax583zqspqdn6ssupdsowq5uo3kwos');
     $push->setUser('uuet8bfx4sdt7y57x8sjkhgcbrt85b');
