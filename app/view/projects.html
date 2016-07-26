@@ -20,11 +20,11 @@
         <div class="col-lg-10 col-lg-offset-1 centered">
             <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
                 <!-- Indicators -->
-                <ol class="carousel-indicators">
+                <!--<ol class="carousel-indicators">
                     <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
                     <li data-target="#carousel-example-generic" data-slide-to="1"></li>
                     <li data-target="#carousel-example-generic" data-slide-to="2"></li>
-                </ol>
+                </ol>-->
 
                <exclude> <!-- Wrapper for slides -->
                 <div class="carousel-inner">
@@ -38,9 +38,16 @@
             {{ @video_embed }}
         </div>
 
+
+        <check if="{{ @not_latest }} == {{ TRUE }}">
+            <div class="col-lg-offset-1" style="clear:both;">
+            <div style="  top: 1.5em;    position: relative; font-size:1.1em" class="alert alert-danger"><i class="icon-warning-sign"></i>&nbsp;&nbsp;<strong>This is no longer the most recent draft</strong>. <a href="{{ @latest_link }}">Click here to see the latest</a>.</div>
+                </div>
+        </check>
         <div class="col-lg-5 col-lg-offset-1">
             <div class="spacing"></div>
-            <h4>{{ @project['project_full'] }}<span class="lighter"> | Version {{ @version['version_name'] }}</span></h4>
+
+            <h4>{{ @project['project_full'] }}<span class="lighter"> | {{ @version_text }}{{ @version['version_name'] }}</span></h4>
             <p>{{ @project['description'] }}</p>
               </div>
 

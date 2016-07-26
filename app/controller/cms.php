@@ -143,7 +143,8 @@ class Project {
             "client_id"=>$projects->client_id,
             "project_short"=>$project_short,
             "project_full"=> $projects->project_full,
-            "description"=> $projects->description
+            "description"=> $projects->description,
+            "drafts" => $projects->drafts
         );
 
         return $out;
@@ -189,6 +190,7 @@ class Project {
                 "project_full"=>$project->project_full,
                 "description"=> $projects->description,
                 "active"=>$projects->active,
+                "drafts"=>$projects->drafts,
                 "project_url"=> $f3->get('site.url').$client_short."/".$project->project_short
             );
         }
@@ -729,6 +731,10 @@ class cms {
 
         $newest_version = max($versions);
 
+        if($project['drafts']){
+            $f3->set('version_text',"Version ");
+        }
+
         $version_summaries = "";
         foreach($versions as $version) {
             $version_summaries .= $version_obj->render_version_summary($version, $args['version_name']?$args['version_name']:$newest_version['version_name']);
@@ -745,6 +751,15 @@ class cms {
                 }
             }
         }
+
+        // if this is a project where versions are used as incremental drafts, warn if they are not on the latest
+        if($project['drafts']) {
+            if ($version != $newest_version) {
+                $f3->set('not_latest', TRUE);
+                $f3->set('latest_link', $f3->get('site.url') . $args['client'] . '/' . $args['project']);
+            }
+        }
+
 
 
         // get vendor info
