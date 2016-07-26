@@ -146,6 +146,7 @@ function parse_video_codec($codec) {
     $out = "Unknown codec";
 
     if(preg_match("/prores/",$codec,$matches)) $out = "Pro Res";
+    if(preg_match("/ProRes/",$codec,$matches)) $out = "Pro Res";
     if(preg_match("/h264/",$codec,$matches)) $out = "H.264";
     if(preg_match("/mjpeg/",$codec,$matches)) $out = "QuickTime Motion JPEG";
 
