@@ -1,0 +1,20 @@
+<div class="thumbnail">
+    <img src="data:image/jpeg;base64,{{ @thumbnail['base64'] }}" />
+    <p><a class="btn btn-success" href="{{ @site.url }}{{ @client['client_short'] }}/{{ @project['project_short'] }}/{{ @version['version_id'] }}/set/thumb/{{ @thumbnail['number'][1] }}">
+            <span class="glyphicon glyphicon-check"></span>
+            {{ @thumbnail['filename'] }}
+        </a>
+        </p>
+</div>
+
+
+<exclude>
+
+    <li>File ID: {{ @val['file_id'] }}</li>
+    <li>Version ID: {{ @val['version_id'] }}</li>
+    <li>Quality: {{ @val['quality'] }}</li>
+    <li>Complete: {{ @val['complete'] }}</li>
+    <li>Is master: {{ @val['is_master'] }}</li>
+    <li>Path: {{ @val['path'] }}</li>
+
+</exclude>

@@ -1,5 +1,6 @@
 <F3:repeat group="{{@jobs}}" key="{{@key}}" value="{{@job}}">
     <tr>
+        <td>{{$job['controls']}}</td>
         <td>{{$job['id']}}</td>
         <td>{{$job['status']}}</td>
         <td>{{$job['progress']}}</td>

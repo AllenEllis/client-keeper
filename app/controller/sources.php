@@ -52,13 +52,22 @@ function set_client_branding($client) {
 }
 
 
-function get_video_attributes($video) { // todo remove this function
+function get_video_attributes($video) {
     $out = array();
     $f3 = \Base::instance();
     $ffprobe_path = $f3->get('ffprobe_path');
 
     $command = $ffprobe_path . ' "' . $video . '" -v error -show_entries stream=width,height,codec_name,codec_long_name,duration, -of default=noprint_wrappers=1 -print_format json -select_streams v:0 >&1';
     $output = shell_exec($command);
+
+    /*if($video =="/volume1/web/projects/David Sarkus/AGC and NDSC Highlights (2016)/Drafts/David Sarkus Clip - v Peter Drucker on Emphathy.mov") {
+        echo "Command was ". $command;
+        echo "<br>";
+        echo "response was ";
+        echo var_dump($output);
+        die;
+    }*/
+
 
     $attributes = object_to_array(json_decode($output))['streams'][0];
     $out[] = array("Attributes are",$attributes);
@@ -182,4 +191,41 @@ function sanitize_status($status) {
     if($status == 'tc') $status = "processing";
     if($status != 'failed' && $status != 'success') $status = 'processing';
     return $status;
+}
+
+
+function calc_eta($progress,$starttime) {
+    $currenttime = time();
+    /*$ct = new dateTime();
+    $ct->setTimeZone(new DateTimeZone('Etc/UTC'));
+    $_ct = $ct->getTimestamp();*/
+    $_ct = time();
+
+    $st = new DateTime($starttime);
+    $_st = $st->getTimestamp();
+
+    $duration = $_st - $_ct;
+
+
+    return $_st;
+}
+
+function curl_del($path)
+{
+    //$url = $this->__url.$path;
+    $url = $path;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return $result;
+}
+
+function contains($haystack, $needle, $caseSensitive = false) {
+    return $caseSensitive ?
+        (strpos($haystack, $needle) === FALSE ? FALSE : TRUE):
+        (stripos($haystack, $needle) === FALSE ? FALSE : TRUE);
 }

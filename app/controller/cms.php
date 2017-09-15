@@ -243,6 +243,7 @@ class Version {
         $f3 = \Base::instance();
         $versions_db=new DB\SQL\Mapper($f3->get('DB'),'versions');
         $versions_db->load(array('version_id=?',$version_id),array());
+
         return $versions_db;
     }
 
@@ -415,9 +416,9 @@ class Version {
                 "size" => $thumb_width."x".$thumb_height,
                 "format" => "jpg"
             ),
-            "segments_options" => array(
-                "segment_time" => 3
-            ),
+            #"segments_options" => array(
+            #    "segment_time" => 3
+            #),
             "callback_urls" => ""
             );
 
@@ -432,6 +433,14 @@ class Version {
                 continue;
             }
 
+
+            // convert paths to ones that my windows transcoder can understand
+            $data['source_file'] = str_replace("/var/www/html/clients/projects/","N:\projects\\",$data['source_file']);
+            $data['destination_file'] = str_replace("/var/www/html/clients/projects/","N:\projects\\",$data['destination_file']);
+
+            // convert slashes to windows
+            $data['source_file'] = str_replace("/","\\",$data['source_file']);
+            $data['destination_file'] = str_replace("/","\\",$data['destination_file']);
 
 
             $out[] = array("About to request the following via POST to $encoder_url",$data);
@@ -715,6 +724,11 @@ class cms {
 
     function project($f3,$args) {
 
+        global $version;
+        global $project;
+        global $client;
+        global $f3;
+
         $client_obj = new Client;
         $client = $f3->set('client', $client_obj->get());
 
@@ -789,14 +803,180 @@ class cms {
         $f3->set('title',$client['client_full'] . " | ". $project['project_full']);
         $f3->set('video_embed',$video_embed);
 
-        set_client_branding($client);
+        if($args['edit'] == 'edit') {
 
-        echo \Template::instance()->render('projects.html');
+            // function print_edit_version {
+            // $edit_thumbnail_grid = ...
+            // $edit_other_things = ...
+            // return template for [all variables];
+            // }
+
+            // echo print_edit_version($version);
+
+
+
+            /*$thumb = $version['thumb'];
+            // get list of thumbnails
+            $thumbnail_grid
+
+            $f3->set('edit_thumbnails', $edit_thumbnails);
+            // private admin view*/
+
+            // TODO: authenticate as admin
+
+            echo $this->print_edit_version();
+
+            //echo \Template::instance()->render('edit_projects.html');
+
+        }
+        else {
+
+            // public view
+
+            set_client_branding($client);
+
+            echo \Template::instance()->render('projects.html');
+        }
+
+
+
 
         return;
 
 
     }
+
+
+    function print_edit_version() {
+
+        global $f3;
+        global $version;
+        global $project;
+        global $client;
+
+
+
+
+        // scrape all existing thumbnails
+
+
+
+        $thumbnail_grid = "";
+        $thumbnails = $this->crawl_for_thumbnails(); // create loop
+
+        foreach($thumbnails as $thumbnail) {
+            $f3->set('thumbnail',$thumbnail);
+            $thumbnail_grid .= \Template::instance()->render('edit_thumbnail_grid.html');
+        }
+
+        $f3->set('thumbnail_grid',$thumbnail_grid);
+
+        //$edit_other_things = ...
+
+        return \Template::instance()->render('edit_version.html');
+    }
+
+    function crawl_for_thumbnails() {
+
+        global $f3;
+        global $version;
+        global $project;
+        global $client;
+
+        $thumbnails = array();
+
+        $f3 = \Base::instance();
+        $path = $f3->get('project_root');
+        $out = array();
+
+        $db = $f3->get('DB');
+
+        $out[]="Crawling through list of files in this transcodes folder";
+
+        $drafts_dir = $path . "/" . $client['client_full'] . "/" . $project['project_full'] . "/Drafts";
+        $transcodes_dir = $drafts_dir . "/Transcodes";
+        $out[].="----Scanning $transcodes_dir";
+        if (!$files = @scandir($transcodes_dir)) {
+            $out[] .= "----Notice: can't find a transcodes folder here, skipping [$transcodes_dir]";
+            return;
+        }
+
+        // loop through every file to create array of usable thumbnail paths & data
+        for ($i = 0; $i < count($files); $i++) {
+
+            if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) {
+                continue;
+            }
+
+            if(!contains($files[$i],"[720]")) continue; // only bother with low res thumbnails
+
+            if(!contains($files[$i],$version['version_name'])) continue; // filter out unless version name matches
+
+            $extension = strtolower(substr($files[$i],-3));
+            if ($extension != "jpg") continue;
+
+            $thumbnails[$i]['filename'] = $filename = $files[$i];
+            $thumbnails[$i]['full_path'] = $full_path = $transcodes_dir . '/' . $files[$i];
+
+            preg_match("/(\d+)\.jpg/",$filename,$numbers);
+            $thumbnails[$i]['number'] = $numbers;
+            $thumbnails[$i]['base64'] = base64_encode(file_get_contents($full_path));
+
+        }
+
+        return($thumbnails);
+    }
+
+
+
+    function set($f3,$args) {
+        global $f3;
+        echo "<pre>";
+        // todo authenticate as admin
+
+        if($args['edit'] == 'set') {
+            if($args['type'] == 'thumb') {
+
+
+                $version = new Version;
+                $db = $version->populate($args['version_id']);
+                $_version = $version->get($args['version_id']);
+
+                $client = new Client;
+                $project = new Project;
+
+                $_project = $project->get($_version['project_id']);
+                $_client = $client->get($_project['client_id']);
+
+
+
+
+                $path = $f3->get('project_root').'/'.$_client['client_full'].'/'.$_project['project_full'].'/Drafts/Transcodes/'.substr($_version['version_master_filename'],0,-4).' [720]-'.$args['val'].'.jpg';
+
+
+
+                $db->thumb=$path;
+                $db->save();
+
+                $return_url = $f3->get('base_url') .'/'.$_client['client_short'].'/'.$_project['project_short'].'/'.$_version['version_name'];
+                header("Location:".$return_url);
+/*
+                // debugging
+                print_r($_client);
+                print_r($_version);
+                print_r($_project);
+                print_r($args);
+                echo "<hr />";
+                echo $path;
+                echo "<br />";
+                echo $return_url;
+*/
+
+            }
+        }
+
+    }
+
 
     function dl($f3,$args) {
         /* echo "<b>";
@@ -818,7 +998,7 @@ class cms {
     }
 
     function bounce() {
-        header("Location:http://allenellis.com");
+        #header("Location:http://allenellis.com");
     }
 
     function vendorlist() {

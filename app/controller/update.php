@@ -37,7 +37,21 @@ class update {
         $out[]="Scanning for changes for new client folders";
         for($i=0;$i<count($files);$i++) {
             $match = 0;
-            if($files[$i]== "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "(others)" || $files[$i] == "Allen Ellis" || $files[$i] == "Archive" || $files[$i] == "Transcodes" ) continue;
+            if(
+                $files[$i]== "." ||
+                $files[$i] == ".." ||
+                $files[$i] == "(template)"
+                || $files[$i] == ".sync"
+                || $files[$i] == "CacheClip"
+                || $files[$i] == "(others)"
+                || $files[$i] == "(other)"
+                || $files[$i] == "New folder"
+                || $files[$i] == "Allen Ellis"
+                || $files[$i] == "Archive"
+                || $files[$i] == "Transcodes"
+                || $files[$i] == "@eaDir"
+                || $files[$i] == ".DS_STORE") continue;
+            if(!is_dir($files[$i])) continue;
             for($j=0;$j<count($clients);$j++) {
                 if($clients[$j]['client_full']  ==  $files[$i]) {
                     $out[]="Detected: " . $files[$i] . " [already exists]";
@@ -83,9 +97,21 @@ class update {
 
             for ($i = 0; $i < count($files); $i++) {
                 $match = 0;
-                if ($files[$i] == "." || $files[$i] == ".." || $files[$i] == "(template)" || $files[$i] == ".sync" || $files[$i] == "CacheClip" || $files[$i] == "Archive" || $files[$i] == "Transcodes" || $files[$i] == "Stock Footage" ) {
+                if ($files[$i] == "." ||
+                    $files[$i] == ".." ||
+                    $files[$i] == "(template)" ||
+                    $files[$i] == "(other)" ||
+                    $files[$i] == "New folder" ||
+                    $files[$i] == ".sync" ||
+                    $files[$i] == "CacheClip" ||
+                    $files[$i] == "Archive" ||
+                    $files[$i] == "Transcodes" ||
+                    $files[$i] == "Stock Footage" ||
+                    $files[$i] == "@eaDir" ||
+                    $files[$i] == ".DS_Store") {
                     continue;
                 }
+                if(!is_dir($files[$i])) continue;
                 for ($j = 0; $j < count($projects); $j++) {
                     if ($projects[$j]['project_full'] == $files[$i]) {
                         $match = 1;
@@ -308,6 +334,8 @@ class update {
     }
 
 
+
+
     function status($f3,$args) {
         
         $jobs = new Job;
@@ -322,8 +350,35 @@ class update {
             $job = $active_job->cast();
             $job['progress'] = float_to_percent($job['progress']);
             $job['opts'] = json_decode($job['opts'],true);
+
+            $encoder_url = $f3->get('encoder_url') . "/jobs";
+            $job_id = $job['internalId'];
+
+            $job['controls'] = "<a href='".$f3->get('site.url')."status/delete/".$job['id']."'>X</a>";
+
+            // TODO This code could work one day in browser if only my transcoder were served over HTTPS
+/*
+
+            $job['controls'] = "<div data-id='del_".$job_id."'><button class='delete-button'>X</button></div>" . <<<END
+            
+                <script>
+                $('.delete-button').click(function(){               
+                    $.ajax({
+                        type: "DELETE",
+                        url: "{$encoder_url}/{$job_id}",
+
+                        
+                });
+             });
+               
+                </script>
+                            
+END;*/
             $jobs_array[$key] = $job;
-        }
+
+    }
+
+
 
         $vendor = new Vendor;
         $vendor->get($f3->get('default_vendor'));
@@ -335,6 +390,35 @@ class update {
         echo \Template::instance()->render('status.html');
 
     }
+
+    function transcode_delete($f3,$args) {
+        $jobs = new Job;
+
+
+        $job = $jobs->get($args['jobid']);
+        $encoder_url = $f3->get('encoder_url') . "/jobs";
+        $base_url = $f3->get('base_url');
+
+        if(!$job['internalId']) {
+            echo "Can't delete this job. It looks like it's already been deleted";
+            return;
+        }
+
+        $url = $encoder_url . "/" . $job['internalId'];
+        #echo $url;
+        #die;
+        $result = curl_del($url);
+        header("Location:".$base_url."/status");
+
+
+
+        #echo $result;
+
+        return;
+
+    }
+
+
 
 }
 
@@ -356,15 +440,25 @@ class Job {
 
     var $jobs;
 
-    function get($job_id=NULL, $job=NULL) {
+    function get($id=NULL, $job=NULL) {
+        $f3 = \Base::instance();
 
         if($job == NULL) {
             $f3 = \Base::instance();
-            $this->job_db=new DB\SQL\Mapper($f3->get('DBD'),'Jobs');
-            $job=$this->job_db->load(array('job_id=?',$job_id));
+            $this->job_db=new DB\SQL\Mapper($f3->get('DBT'),'Jobs');
+            $job=$this->job_db->load(array('id=?',$id));
         }
 
-        $this-> $job_id = $job->job_id;
+        $out = array(
+            "id" => $job->id,
+            "internalId" => $job->internalId,
+            "status" => $job->status,
+            "progress" => $job->progress
+        );
+        return $out;
+/*
+        $this-> $id = $job->id;
+        echo $id;
         $this-> $internalId = $job->internalId;
         $this-> $status = $job->status;
         $this-> $progress = $job->progress;
@@ -377,6 +471,8 @@ class Job {
         $this-> $thumbnails = $job->thumbnails;
         $this-> $playlist = $job->playlist;
         $this-> $segments = $job->segments;
+
+        return $this;                 */
     }
 
     function get_all($status) {

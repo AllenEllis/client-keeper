@@ -748,3 +748,13 @@ td.text-right {
 	padding-left: 10px;
 	padding-right: 10px;
 }
+
+
+.thumbnail_grid { }
+
+.thumbnail_grid .thumbnail {
+	width: 30%;
+	float: left;
+	text-align: center;
+	margin:3px;
+}

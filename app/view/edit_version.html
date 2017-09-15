@@ -1,0 +1,56 @@
+<include href="header.html" />
+<!-- *****************************************************************************************************************
+ BLUE WRAP
+ ***************************************************************************************************************** -->
+<div id="blue">
+    <div class="container">
+        <div class="row">
+            <h3><a href="{{ @client['client_url'] }}">{{ @client['client_full'] }}</a> <span style="font-weight:lighter">| {{ @project['project_full'] }}</span></h3>
+        </div><!-- /row -->
+    </div> <!-- /container -->
+</div><!-- /blue -->
+
+
+<!-- *****************************************************************************************************************
+	 TITLE & CONTENT
+	 ***************************************************************************************************************** -->
+
+<div class="container mt">
+    <div class="row">
+        <div class="thumbnail_grid">
+            {{ @thumbnail_grid }}
+        </div>
+
+
+        <check if="{{ @not_latest }} == {{ TRUE }}">
+            <div class="col-lg-offset-1" style="clear:both;">
+            <div style="  top: 1.5em;    position: relative; font-size:1.1em" class="alert alert-danger"><i class="icon-warning-sign"></i>&nbsp;&nbsp;<strong>This is no longer the most recent draft</strong>. <a href="{{ @latest_link }}">Click here to see the latest</a>.</div>
+                </div>
+        </check>
+        <div class="col-lg-5 col-lg-offset-1">
+            <div class="spacing"></div>
+
+            <h4>{{ @project['project_full'] }}<span class="lighter"> | {{ @version_text }}{{ @version['version_name'] }}</span></h4>
+            <p>{{ @project['description'] }}</p>
+              </div>
+
+        <div class="col-lg-4 col-lg-offset-1">
+            <div class="spacing"></div>
+            <h4>Download</h4>
+            <div class="hline"></div>
+            {{ @project['download_links'] }}
+            <p>&nbsp;</p>
+            <h4>All Versions</h4>
+            <div class="hline"></div>
+            {{ @version_summaries | raw }}
+            <p>&nbsp;</p>
+        </div>
+
+    </div><! --/row -->
+</div><! --/container -->
+
+
+
+
+
+<include href="footer.html" />

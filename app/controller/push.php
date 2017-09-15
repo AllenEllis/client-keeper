@@ -31,7 +31,8 @@ class push {
         }
 
         $out[] = array("About to embed this file",$path); // todo check sanity of $path. shouldn't be outside working dir, should exist, should end in jpg
-
+#print_r($out);
+#die();
         header("X-Sendfile: $path");
         header('Content-type: image/jpeg');
         #header('Content-disposition: attachment; filename="'.$file['filename'].'"');
@@ -49,7 +50,8 @@ class push {
         $path = $file['path'];
  
         header("X-Sendfile: $path");
-        header('Content-type: video/mp4');
+		header('Content-type: video/mp4');
+#echo "You should see $path";
         #header('Content-disposition: attachment; filename="'.$file['filename'].'"');
         die();
 
