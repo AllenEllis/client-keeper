@@ -275,7 +275,8 @@ class update {
                         $out [] = array("Transcoder is full, aborting all future transcodes. Adavancing to population step.");
                         break;
                     }
-		    if($version['transcoded']) continue;
+                    if($version['transcoded']) continue;
+                    //$out[]= array("Analyzing this. Should I transcode?",$version);
                     $out[] = $version_obj->transcode($version);
                 }
             }

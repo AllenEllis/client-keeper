@@ -344,20 +344,34 @@ class Version {
         $out = array();
         $file_obj = new File;
 
+        $out=array("I've been asked to transcode this file. Running preliminary checks first...",$version);
+
         $extension = substr($version['version_master_filename'],-3);
         if($extension != "mp4" && $extension != "mov") {
             $out[] = array("Notice: can't transcode this file, it's not an mp4 or mov",$version);
-            return FALSE;
+            return $out;
         }
+
+        //if it was modified within the last 3 seconds, assume it's still being rendered or copied
+
+
+        $moddate = filemtime($version['version_master_full_path']);
+        $time = time() - 2;
+        $out[]= array("Doing time check.",$time,$moddate);
+        if($time < $moddate) {
+            $out[] = array("This file was modified within the last 2 seconds. Skipping.");
+            return $out;
+        }
+
 
         $out[] = array("Preparing to transcode version #". $version['version_id'],$version);
 
         $src_path = $version['version_master_full_path'];
 
         if(!@file_exists($src_path)) {
-		$out[] = array("Error: file doesn't exist, can't transcode",$src_path);
-		return FALSE;
-	}
+            $out[] = array("Error: file doesn't exist, can't transcode",$src_path);
+            return $out;
+	    }
 
         $src_filename = $version['version_master_filename'];
         $dst_folder = substr($src_path,0,-strlen($src_filename)) . $f3->get('transcodes_subfolder').'/';
@@ -501,6 +515,7 @@ class Version {
 
         $version_obj->width=$src_attributes['width'];
         $version_obj->height=$src_attributes['height'];
+        $version_obj->transcoded=1;
         $version_obj->save();
 
 

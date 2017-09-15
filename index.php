@@ -88,31 +88,36 @@ $line = date('Y-m-d H:i:s') . ", $_SERVER[REMOTE_ADDR], ".$_SERVER['REQUEST_URI'
 
 
 // push hits
-if($f3->get('push_hits')){
+if($f3->get('push_hits') == TRUE){
 
     include('php-pushover/Pushover.php');
 
-    $ip = $_SERVER['REMOTE_ADDR'];
-
+    //$ip = $_SERVER['REMOTE_ADDR'];
+    $ip = $_SERVER['HTTP_X_REAL_IP'];
 
     if ($ip != "10.10.10.1" && $ip != "10.10.10.80") {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE) ) // is a local ip address
+        {
 
-        $push = new Pushover();
-        $push->setToken('ax583zqspqdn6ssupdsowq5uo3kwos');
-        $push->setUser('uuet8bfx4sdt7y57x8sjkhgcbrt85b');
-        $push->setTitle('Video hit: ' . substr(urldecode($_SERVER['REQUEST_URI']), 9));
-        $push->setMessage('By ' . $ip);
-        #   $push->setUrl('https://allenell.is/clients/hits.php');
-        $push->setUrlTitle('Client hit log');
-        $push->setDevice('ap');
-        $push->setPriority(0);
-        $push->setRetry(0); //Used with Priority = 2; Pushover will resend the notification every 60 seconds until the user accepts.
-        $push->setExpire(0); //Used with Priority = 2; Pushover will resend the notification every 60 seconds for 3600 seconds. After that point, it stops sending notifications.
-        $push->setCallback('');
-        $push->setTimestamp(time());
-        $push->setDebug(false);
-        $push->setSound('');
-        $go = @$push->send();
+            $push = new Pushover();
+            $push->setToken('ax583zqspqdn6ssupdsowq5uo3kwos');
+            $push->setUser('uuet8bfx4sdt7y57x8sjkhgcbrt85b');
+            $push->setTitle('Video hit: ' . substr(urldecode($_SERVER['REQUEST_URI']), 9));
+            $push->setMessage('By ' . $ip);
+            #   $push->setUrl('https://allenell.is/clients/hits.php');
+            $push->setUrlTitle('Client hit log');
+            $push->setDevice('ap');
+            $push->setPriority(0);
+            $push->setRetry(0); //Used with Priority = 2; Pushover will resend the notification every 60 seconds until the user accepts.
+            $push->setExpire(0); //Used with Priority = 2; Pushover will resend the notification every 60 seconds for 3600 seconds. After that point, it stops sending notifications.
+            $push->setCallback('');
+            $push->setTimestamp(time());
+            $push->setDebug(false);
+            $push->setSound('');
+            $go = @$push->send();
+        }
+
+
     }
 
 }
