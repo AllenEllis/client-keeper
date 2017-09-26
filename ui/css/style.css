@@ -758,3 +758,14 @@ td.text-right {
 	text-align: center;
 	margin:3px;
 }
+
+
+.edit_links {
+	margin-left:.5em;
+	opacity: .3;
+	-moz-opacity: .3;
+}
+
+.edit_links:hover {
+	opacity: .6;
+}

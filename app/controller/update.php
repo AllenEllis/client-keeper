@@ -50,6 +50,7 @@ class update {
                 || $files[$i] == "Archive"
                 || $files[$i] == "Transcodes"
                 || $files[$i] == "@eaDir"
+                || $files[$i] == "untitled folder"
                 || $files[$i] == ".DS_STORE") continue;
             if(!is_dir($files[$i])) continue;
             for($j=0;$j<count($clients);$j++) {
@@ -108,10 +109,14 @@ class update {
                     $files[$i] == "Transcodes" ||
                     $files[$i] == "Stock Footage" ||
                     $files[$i] == "@eaDir" ||
+                    $files[$i] == "untitled folder" ||
                     $files[$i] == ".DS_Store") {
                     continue;
                 }
-                if(!is_dir($files[$i])) continue;
+                if(!is_dir($path . "/" . $client['client_full'] . '/' . $files[$i])) {
+                    $out[]="This is not a directory, skipping ".$path . "/" . $client['client_full'] . '/' . $files[$i];
+                    continue;
+                }
                 for ($j = 0; $j < count($projects); $j++) {
                     if ($projects[$j]['project_full'] == $files[$i]) {
                         $match = 1;
@@ -187,6 +192,7 @@ class update {
                         }
                     }
                     if ($match == 0) {
+
                         $version->reset();
                         $version_name = parse_version_name($files[$i]);
                         $full_path = $drafts_dir . '/' . $files[$i];
@@ -199,8 +205,8 @@ class update {
                         $version->version_master_full_path = $file['version_master_full_path'] = $full_path;
                         $version->timestamp = $file['timestamp'] = filemtime($full_path);
                         $version->thumb = $file['thumbnail'] = $thumb;
+                        $version->hidden = 0;
                         $out[] = array("Adding this file to the DB: ", $file);
-
                         $version->save();
                     }
 
@@ -242,6 +248,8 @@ class update {
         $out[] = $obj->crawl_project_folders();
         $out[] = $obj->crawl_drafts_folders();
 
+        #echo "<pre>";
+        #print_r( $out);
         return($out);
 
     }

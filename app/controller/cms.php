@@ -271,7 +271,8 @@ class Version {
             "thumb"=>$version->thumb,
             "width"=>$version->width,
             "height"=>$version->height,
-	    "transcoded"=>$version->transcoded
+	        "transcoded"=>$version->transcoded,
+            "hidden"=>$version->hidden
         );
         return $out;
     }
@@ -299,12 +300,15 @@ class Version {
     function render_version_summary($version,$current_version=NULL) {
         $f3 = \Base::instance();
         $f3->set('version',$version);
+        $f3->set('show_edit_link',FALSE);
 
-        $file_obj = new File;
-        $files = $file_obj->get_all($version['version_id']);
+        $url = $f3->get('PATH');
+        $url = explode("/",$url);
 
-        $out = "";
-        $f3->set('files',$files);
+        if($url[3] == $version['version_name']) {
+            $f3->set('show_edit_link',TRUE);
+        }
+
         if($current_version) $f3->set('current_version',$current_version);
 
         return \Template::instance()->render('version_summary.html');
@@ -770,9 +774,9 @@ class cms {
 
         $version_summaries = "";
         foreach($versions as $version) {
+            if($version['hidden'] == 1) continue;
             $version_summaries .= $version_obj->render_version_summary($version, $args['version_name']?$args['version_name']:$newest_version['version_name'],$order_by);
         }
-
         // display the latest version, unless otherwise sepcified
         $version = $newest_version;
 
@@ -780,7 +784,9 @@ class cms {
             // make sure the version they're asking for is actually for this project
             foreach($versions as $_version) {
                 if ($_version['version_name'] == $args['version_name']) {
-                    $version = $_version;
+                    if($_version['hidden'] != '1') {
+                        $version = $_version;
+                    }
                 }
             }
         }
@@ -946,7 +952,8 @@ class cms {
 
     function set($f3,$args) {
         global $f3;
-        echo "<pre>";
+        #echo "<pre>";
+        #print_r($args);
         // todo authenticate as admin
 
         if($args['edit'] == 'set') {
@@ -988,8 +995,23 @@ class cms {
 */
 
             }
-        }
+            if($args['type'] == 'hidden') {
+                #echo "I'm on a mission!";
+                $version = new Version;
+                $db = $version->populate($args['version_id']);
+                $db->hidden=1;
+                $db->save();
 
+                $client = new Client;
+                $project = new Project;
+
+                $_project = $project->get($_version['project_id']);
+                $_client = $client->get($_project['client_id']);
+
+                $return_url = $f3->get('base_url') .'/'.$_client['client_short'].'/'.$_project['project_short'];
+                header("Location:".$return_url);
+            }
+        }
     }
 
 

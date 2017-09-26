@@ -19,7 +19,8 @@ function parse_version_name($filename) {
     $version['name'] = substr($match[1],0,-4);
     $version['ext'] = substr($match[1],-3);
 
-    if(!$match[1]) return 0;
+    if(!$match[1]) return 'X';
+    if($version['name'] == '') $version['name'] = 'X';
     return $version;
 }
 
@@ -228,4 +229,19 @@ function contains($haystack, $needle, $caseSensitive = false) {
     return $caseSensitive ?
         (strpos($haystack, $needle) === FALSE ? FALSE : TRUE):
         (stripos($haystack, $needle) === FALSE ? FALSE : TRUE);
+}
+
+function wget_request($url, $post_array, $check_ssl=true) {
+
+    $cmd = "curl -X POST -H 'Content-Type: application/json'";
+    $cmd.= " -d '" . json_encode($post_array) . "' '" . $url . "'";
+
+    if (!$check_ssl){
+        $cmd.= "  --insecure"; // this can speed things up, though it's not secure
+    }
+    $cmd .= " > /dev/null 2>&1 &"; //just dismiss the response
+
+    exec($cmd, $output, $exit);
+    print_r($cmd);
+    return $exit == 0;
 }
