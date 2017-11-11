@@ -242,6 +242,6 @@ function wget_request($url, $post_array, $check_ssl=true) {
     $cmd .= " > /dev/null 2>&1 &"; //just dismiss the response
 
     exec($cmd, $output, $exit);
-    print_r($cmd);
+    //print_r($cmd);
     return $exit == 0;
 }

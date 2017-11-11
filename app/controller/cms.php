@@ -260,6 +260,8 @@ class Version {
 
         if(!$version) return;
 
+	date_default_timezone_set("America/New_York");
+
         $out = array(
             "version_id"=>$version->version_id,
             "project_id"=>$version->project_id,

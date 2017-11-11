@@ -23,14 +23,15 @@ function logit($ip,$request,$referer)
 
 
 // push hits
-
+file_put_contents("temp.log","LOG START \r\n".print_r(array("_POST"=>$_POST,"IP"=>$ip),1)."\r\nLOG END","FILE_APPEND");
+echo "im here";
 
         include('php-pushover/Pushover.php');
 
         //$ip = $_SERVER['REMOTE_ADDR'];
         //$ip = $_SERVER['HTTP_X_REAL_IP'];
 
-        if ($ip != "10.10.10.1" && $ip != "10.10.10.80") {
+        if ($ip != "10.10.10.1" && $ip != "10.10.10.80" && $ip != "127.0.0.1") {
         //if(1==1) {
             if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE)) // is a local ip address
             //if(1==1)
@@ -44,7 +45,10 @@ function logit($ip,$request,$referer)
                 $_details['org'] = $details['org']?$details['org']:"";
                 $_details['hostname'] = $details['hostname']?$details['hostname']:"";
                 $_details['network'] = $details['network']?$details['network']:"";
+                $_details['city'] = $details['city']?$details['city']:"";
+                $_details['region'] = $details['region']?$details['region']:"";
                 $_details['referer'] = $referer?"From ".$referer:"";
+
 
 
 print_r(array("_details",$_details));
@@ -98,7 +102,8 @@ print_r(array("_details",$_details));
 }
 
 function ip_details($ip) {
-    $json = file_get_contents("http://ipinfo.io/{$ip}/json");
+    if($ip == "127.0.0.1") return "127.0.0.1";
+    $json = file_get_contents("http://ipinfo.io/{$ip}/json/?token=718a593bb68f52");
     $details = json_decode($json, true);
     return $details;
 }

@@ -17,6 +17,11 @@
 
 <div class="container mt">
     <div class="row">
+        <check if="{{ @not_latest }} == {{ TRUE }}">
+            <div class="col-lg-offset-1" style="clear:both;">
+                <div style="  top: 1.5em;    position: relative; font-size:1.1em; margin-bottom:50px; " class="alert alert-danger"><i class="icon-warning-sign"></i>&nbsp;&nbsp;<strong>This is no longer the most recent draft</strong>. <a href="{{ @latest_link }}">Click here to see the latest</a>.</div>
+            </div>
+        </check>
         <div class="col-lg-10 col-lg-offset-1 centered">
             <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
                 <!-- Indicators -->
@@ -39,11 +44,7 @@
         </div>
 
 
-        <check if="{{ @not_latest }} == {{ TRUE }}">
-            <div class="col-lg-offset-1" style="clear:both;">
-            <div style="  top: 1.5em;    position: relative; font-size:1.1em" class="alert alert-danger"><i class="icon-warning-sign"></i>&nbsp;&nbsp;<strong>This is no longer the most recent draft</strong>. <a href="{{ @latest_link }}">Click here to see the latest</a>.</div>
-                </div>
-        </check>
+
         <div class="col-lg-5 col-lg-offset-1">
             <div class="spacing"></div>
 

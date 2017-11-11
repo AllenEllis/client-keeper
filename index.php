@@ -75,11 +75,15 @@ $f3->route(
 
 
 
+//echo $_SERVER['REMOTE_ADDR'];
+//echo "<hr />";
+//phpinfo();
+//die;
+//HTTP_X_REAL_IP
 
 $f3->run();
-
 if ($f3->get('push_hits') == TRUE) {
-    logit($_SERVER['HTTP_X_REAL_IP'],$_SERVER['REQUEST_URI'],$_SERVER['HTTP_REFERER']);
+    logit($_SERVER['REMOTE_ADDR'],$_SERVER['REQUEST_URI'],$_SERVER['HTTP_REFERER']);
 }
 
 function logit($ip,$request,$referer) {
